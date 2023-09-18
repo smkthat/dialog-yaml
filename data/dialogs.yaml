@@ -1,0 +1,3 @@
+dialogs:
+  Main: !include main.yaml
+  Layouts: !include layouts.yaml

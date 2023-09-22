@@ -3,7 +3,8 @@ from .text import (
     FormatModel,
     MultiTextModel,
     CaseModel,
-    ListModel
+    ListModel,
+    TextField
 )
 
 text_classes = dict(

@@ -2,14 +2,15 @@ from typing import List, Dict
 
 from aiogram.fsm.state import State, StatesGroup
 
-from .decorators import singleton
+from core.decorators import singleton
 
 
 @singleton
 class YAMLDialogStatesHolder(dict):
 
-    def load_data(self, data: Dict, states: List[StatesGroup] = None) -> 'YAMLDialogStatesHolder':
-        self._load_states(data)
+    def load_data(self, data: Dict = None, states: List[StatesGroup] = None) -> 'YAMLDialogStatesHolder':
+        if data:
+            self._load_states(data)
         if states:
             self.add_states(states)
         return self
@@ -60,6 +61,26 @@ class YAMLDialogStatesHolder(dict):
                         raise ValueError(f'Invalid value for dialogs[{group_name!r}]["windows"]: {e}')
         except KeyError:
             raise ValueError('Tag "dialogs" not provided')
+
+    def parse_objs(self, raw_states_group_list: list[str]):
+        """
+         example: ['ExampleSG:e1', 'ExampleSG:e2', 'ExampleSG:e3', ]
+
+         will provide ExampleSG state group with e1, e2, e3 states
+        """
+        data = {}
+        for raw_state_group in raw_states_group_list:
+            group_name, state_name = raw_state_group.split(':')
+            group = data.get(group_name, [])
+            group.append(state_name)
+            data[group_name] = group
+
+        for group_name, raw_states in data.items():
+            states = self._build_states(tuple(raw_states))
+            states_group = self._build_states_group(group_name, states)
+            for state_name, state in states.items():
+                self[f'{group_name}:{state_name}'] = state
+            self[group_name] = states_group
 
     def add_states(self, states_group_list: List[StatesGroup]) -> None:
         for states_group in states_group_list:

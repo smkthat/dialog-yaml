@@ -27,7 +27,7 @@ windows:
           state: Layouts:COLUMN
       - switch_to:
           text: "↩️ Group"
-          id: "group"
+          id: group
           state: Layouts:GROUP
       - start: !include components/menu_button.yaml
   ROW:

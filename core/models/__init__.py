@@ -1,16 +1,16 @@
-from typing import Type, Union, List, Dict, Any, Optional
+from typing import Type, Union, List, Dict, Any
 
 from pydantic import BaseModel, ValidationError
 
-from core.exceptions import BaseModelCreationError, SubModelCreationError, DialogYamlException
+from core.exceptions import BaseModelCreationError, SubModelCreationError
 
 
 class YAMLModel(BaseModel):
-    _models_classes_: dict[str, Type[BaseModel]] = {}
+    models_classes: dict[str, Type[BaseModel]] = {}
 
     @classmethod
     def set_classes(cls, models_classes: dict[str, Type[BaseModel]]) -> None:
-        cls._models_classes_ = models_classes
+        cls.models_classes = models_classes
 
     @classmethod
     def from_data(
@@ -45,7 +45,7 @@ class YAMLModel(BaseModel):
         submodels = {}
         if isinstance(data, Dict):
             for yaml_model_name, yaml_model_data in data.items():
-                yaml_model_class = cls._models_classes_.get(yaml_model_name)
+                yaml_model_class = cls.models_classes.get(yaml_model_name)
                 if yaml_model_class:
                     sub_model = YAMLSubModel.model_validate({
                         'yaml_model_class': yaml_model_class,

@@ -1,9 +1,10 @@
-from typing import (Union, Generic, Optional, Any)
+from typing import (Union, Generic, Optional, Any, Annotated, Self)
 
 from aiogram_dialog.widgets.text import Const, Format, Multi, Case, List
+from pydantic import BeforeValidator
 
 from core.models.base import WidgetModel, T
-from core.models.funcs import FuncModel
+from core.models.funcs import FuncModel, FuncField
 
 
 class TextModel(WidgetModel, Generic[T]):
@@ -17,21 +18,15 @@ class TextModel(WidgetModel, Generic[T]):
         return Const(**kwargs)
 
     @classmethod
-    def to_model(cls, data: Union[str, dict]) -> 'TextModel':
+    def to_model(cls, data: Union[str, dict, Self]) -> Self:
+        if isinstance(data, cls):
+            return data
         if isinstance(data, str):
             data = {'val': data}
-        return TextModel(**data)
+        return cls(**data)
 
-    @classmethod
-    def model_validate(
-        cls,
-        obj: Any,
-        *,
-        strict: bool | None = None,
-        from_attributes: bool | None = None,
-        context: dict[str, Any] | None = None,
-    ) -> 'TextModel':
-        pass
+
+TextField = Annotated[TextModel, BeforeValidator(TextModel.to_model)]
 
 
 class FormatModel(TextModel, Generic[T]):
@@ -43,17 +38,15 @@ class FormatModel(TextModel, Generic[T]):
         return Format(**kwargs)
 
     @classmethod
-    def to_model(cls, data: Union[str, dict]) -> 'FormatModel':
+    def to_model(cls, data: Union[str, dict, Self]) -> Self:
         if isinstance(data, str):
             data = {'val': data}
-        return FormatModel(**data)
+        return cls(**data)
 
 
 class MultiTextModel(WidgetModel):
-    texts: list[TextModel]
+    texts: list[TextField]
     sep: Optional[str] = '\n'
-
-    # TODO: Implement getter
 
     def get_obj(self) -> Multi:
         kwargs = dict(
@@ -66,15 +59,17 @@ class MultiTextModel(WidgetModel):
         )
 
     @classmethod
-    def to_model(cls, data: dict):
+    def to_model(cls, data: Union[dict, Self]) -> Self:
+        if isinstance(data, cls):
+            return Self
         if texts := data.get('texts'):
             data['texts'] = [cls.from_data(text_data) for text_data in texts]
         return cls(**data)
 
 
 class CaseModel(WidgetModel):
-    texts: dict[Any, FormatModel]
-    selector: Union[str, FuncModel]
+    texts: dict[Any, TextField]
+    selector: Union[str, FuncField]
 
     def get_obj(self) -> Case:
         kwargs = dict(
@@ -87,11 +82,13 @@ class CaseModel(WidgetModel):
         )
 
     @classmethod
-    def to_model(cls, data: dict):
-        if 'texts' in data:
+    def to_model(cls, data: Union[dict, Self]) -> Self:
+        if isinstance(data, cls):
+            return data
+        if texts := data.get('texts'):
             data['texts'] = {
-                item: FormatModel.to_model(value)
-                for item, value in data['texts'].items()
+                item: FormatModel.to_model(text_data)
+                for item, text_data in texts.items()
             }
         if 'selector' in data and isinstance(data['selector'], dict):
             data['selector'] = cls.from_data(data['selector'])
@@ -100,7 +97,7 @@ class CaseModel(WidgetModel):
 
 class ListModel(WidgetModel):
     field: FormatModel
-    items: Union[str, list, dict, FuncModel]
+    items: Union[str, list, FuncField, dict]
     sep: Optional[str] = "\n"
 
     def get_obj(self) -> List:
@@ -115,7 +112,9 @@ class ListModel(WidgetModel):
         )
 
     @classmethod
-    def to_model(cls, data: dict) -> 'ListModel':
+    def to_model(cls, data: Union[dict, Self]) -> Self:
+        if isinstance(data, cls):
+            return data
         data['field'] = FormatModel.to_model(data['field'])
         if isinstance(data['items'], str):
             data['items'] = FuncModel.to_model(data['items'])

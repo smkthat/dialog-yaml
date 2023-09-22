@@ -4,16 +4,16 @@ from typing import Generic, Optional, Union
 from aiogram_dialog.widgets.kbd import Checkbox, Select, Radio, Multiselect
 
 from core.models.base import WidgetModel, T
-from core.models.funcs import FuncModel
-from core.models.texts import TextModel, FormatModel
+from core.models.funcs import FuncModel, FuncField
+from core.models.texts import TextModel, FormatModel, TextField
 
 
 class CheckboxModel(WidgetModel, Generic[T]):
     id: str
-    on_state_changed: Optional[FuncModel] = None
-    checked: Optional[TextModel] = TextModel(val='[✓] Checked')
-    unchecked: Optional[TextModel] = TextModel(val='[ ] Unchecked')
-    default: Optional[bool] = True
+    on_state_changed: FuncField = None
+    checked: TextField = TextField(val='[✓] Checked')
+    unchecked: TextField = TextField(val='[ ] Unchecked')
+    default: bool = True
 
     def get_obj(self) -> Checkbox:
         args = [
@@ -32,22 +32,22 @@ class CheckboxModel(WidgetModel, Generic[T]):
         )
 
     @classmethod
-    def to_model(cls, data: Union[str, dict]) -> 'CheckboxModel':
-        return cls.model_validate(data)
+    def to_model(cls, data: Union[str, dict]) -> T:
+        return cls(**data)
 
 
 class SelectModel(WidgetModel, Generic[T]):
-    text: Optional[Union[TextModel, FormatModel]]
+    text: TextField = None
     id: str
     items: Union[str, list, dict]
-    item_id_getter: Union[int, str, FuncModel]
-    on_click: Optional[FuncModel]
+    item_id_getter: Union[int, str, FuncField]
+    on_click: FuncField = None
 
     def get_obj(self) -> Select:
         item_id_getter = self.item_id_getter
         if isinstance(item_id_getter, int):
             item_id_getter = operator.itemgetter(item_id_getter)
-        else:
+        if isinstance(item_id_getter, FuncModel):
             item_id_getter = item_id_getter.func
         kwargs = dict(
             text=self.text.get_obj(),
@@ -62,21 +62,21 @@ class SelectModel(WidgetModel, Generic[T]):
         )
 
     @classmethod
-    def to_model(cls, data: Union[str, dict]) -> 'SelectModel':
+    def to_model(cls, data: Union[str, dict]) -> T:
         if 'format' in data:
             data['text'] = data.pop('format')
-        if isinstance(data['item_id_getter'], str):
-            data['item_id_getter'] = FuncModel.to_model(data['item_id_getter'])
+        # if isinstance(data['item_id_getter'], str):
+        #     data['item_id_getter'] = FuncModel.to_model(data['item_id_getter'])
         return cls(**data)
 
 
 class RadioModel(WidgetModel, Generic[T]):
     id: str
     items: Union[str, list, dict]
-    on_state_changed: Optional[FuncModel]
-    checked: Optional[FormatModel] = FormatModel(val='✓ {item}')
-    unchecked: Optional[FormatModel] = FormatModel(val='{item}')
-    item_id_getter: Union[int, str, FuncModel]
+    on_state_changed: FuncField = None
+    checked: TextField = TextField(val='✓ {item}')
+    unchecked: TextField = TextField(val='{item}')
+    item_id_getter: Union[int, str, FuncField]
 
     def get_obj(self) -> Radio:
         args = [
@@ -86,7 +86,7 @@ class RadioModel(WidgetModel, Generic[T]):
         item_id_getter = self.item_id_getter
         if isinstance(item_id_getter, int):
             item_id_getter = operator.itemgetter(item_id_getter)
-        else:
+        if isinstance(item_id_getter, FuncModel):
             item_id_getter = item_id_getter.func
         kwargs = dict(
             id=self.id,
@@ -102,8 +102,8 @@ class RadioModel(WidgetModel, Generic[T]):
 
     @classmethod
     def to_model(cls, data: Union[str, dict]) -> 'RadioModel':
-        if isinstance(data['item_id_getter'], str):
-            data['item_id_getter'] = FuncModel.to_model(data['item_id_getter'])
+        # if isinstance(data['item_id_getter'], str):
+        #     data['item_id_getter'] = FuncModel.to_model(data['item_id_getter'])
         return cls(**data)
 
 

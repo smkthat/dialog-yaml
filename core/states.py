@@ -1,14 +1,19 @@
-from typing import List, Dict
+import logging
+from typing import List, Dict, Self
 
 from aiogram.fsm.state import State, StatesGroup
 
 from core.decorators import singleton
+from core.exceptions import InvalidTagName, DialogYamlException
+
+logger = logging.getLogger(__name__)
 
 
 @singleton
 class YAMLDialogStatesHolder(dict):
 
-    def load_data(self, data: Dict = None, states: List[StatesGroup] = None) -> 'YAMLDialogStatesHolder':
+    def load_data(self, data: Dict = None, states: List[StatesGroup] = None) -> Self:
+        logger.debug('Load states data')
         if data:
             self._load_states(data)
         if states:
@@ -24,9 +29,10 @@ class YAMLDialogStatesHolder(dict):
             return found
 
     def get_by_name(self, name: str) -> State:
-        if found := self.get(name):
+        found = self.get(name)
+        if found is not None:
             return found
-        raise ValueError(f'State {name!r} does\'t exist.')
+        raise DialogYamlException(f'State {name!r} does not exist.')
 
     @classmethod
     def _build_states(cls, values: tuple) -> Dict[str, State]:
@@ -52,7 +58,9 @@ class YAMLDialogStatesHolder(dict):
                         states = self._build_states(tuple(windows_data.keys()))
                         states_group = self._build_states_group(group_name, states)
                         for state_name, state in states.items():
-                            self[f'{group_name}:{state_name}'] = state
+                            state_name_raw = f'{group_name}:{state_name}'
+                            logger.debug(f'Build state {state_name_raw!r}')
+                            self[state_name_raw] = state
                         self[group_name] = states_group
 
                     except KeyError as e:
@@ -60,14 +68,15 @@ class YAMLDialogStatesHolder(dict):
                     except ValueError as e:
                         raise ValueError(f'Invalid value for dialogs[{group_name!r}]["windows"]: {e}')
         except KeyError:
-            raise ValueError('Tag "dialogs" not provided')
+            raise InvalidTagName(tag='dialogs')
 
     def parse_objs(self, raw_states_group_list: list[str]):
         """
-         example: ['ExampleSG:e1', 'ExampleSG:e2', 'ExampleSG:e3', ]
+         example: ['ExampleSG:e1', 'ExampleSG:e2', 'ExampleSG:e3']
 
          will provide ExampleSG state group with e1, e2, e3 states
         """
+        logger.debug(f'Parse states from {raw_states_group_list}')
         data = {}
         for raw_state_group in raw_states_group_list:
             group_name, state_name = raw_state_group.split(':')

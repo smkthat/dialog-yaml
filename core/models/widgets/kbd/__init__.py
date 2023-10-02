@@ -10,6 +10,7 @@ from .keyboard import (
     GroupKeyboardModel,
     RowKeyboardModel,
     ColumnKeyboardModel,
+    ScrollingGroupKeyboardModel,
 
     GroupKeyboardField
 )
@@ -26,4 +27,5 @@ keyboard_classes = dict(
     group=GroupKeyboardModel,
     row=RowKeyboardModel,
     column=ColumnKeyboardModel,
+    scrolling_group=ScrollingGroupKeyboardModel,
 )

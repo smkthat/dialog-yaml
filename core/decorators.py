@@ -1,9 +1,8 @@
 import functools
-from typing import Type, Optional
+from typing import Type
 
 
 def singleton(cls: Type):
-
     @functools.wraps(cls)
     def wrapper(*args, **kwargs):
         if not wrapper.instance:

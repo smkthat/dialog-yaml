@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Any
 
 from pydantic import ConfigDict
 
@@ -12,3 +12,7 @@ class WidgetModel(YAMLModel, Generic[T]):
     model_config = ConfigDict(arbitrary_types_allowed=True, extra='allow')
 
     when: FuncField = None
+
+    @classmethod
+    def to_model(cls, data: Any):
+        raise NotImplementedError(data)

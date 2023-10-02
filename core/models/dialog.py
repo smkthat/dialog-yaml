@@ -5,6 +5,7 @@ from pydantic import field_validator
 
 from core.models.funcs import FuncField
 from core.models.base import WidgetModel, T
+from core.utils import clean_empty
 
 
 class DialogModel(WidgetModel):
@@ -17,14 +18,14 @@ class DialogModel(WidgetModel):
     preview_data: FuncField = None
 
     def get_obj(self) -> Dialog:
-        kwargs = dict(
+        kwargs = clean_empty(dict(
             on_start=self.on_start.func if self.on_start else None,
             on_close=self.on_close.func if self.on_close else None,
             on_process_result=self.on_process_result.func if self.on_process_result else None,
             launch_mode=self.launch_mode,
             getter=self.getter.func if self.getter else None,
             preview_data=self.preview_data.func if self.getter else None
-        )
+        ))
         return Dialog(
             *[window.get_obj() for window in self.windows],
             **kwargs

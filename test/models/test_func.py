@@ -1,5 +1,6 @@
 import pytest
 
+from conftest import func_test, func_registry_instance
 from core.exceptions import (
     MissingFunctionName,
     MissingFunctionCategoryName,
@@ -9,42 +10,28 @@ from core.exceptions import (
 from core.models.funcs import (
     FuncModel,
     NotifyModel,
-    FuncRegistry,
     notify_func
 )
 
 
-@pytest.fixture(scope='function')
-def test_function():
-    def func():
-        pass
-    return func
-
-
-@pytest.fixture(scope='class')
-def func_registry_instance():
-    return FuncRegistry()
-
-
 class TestFuncRegistry:
-
     def test_register_function(self, func_registry_instance):
-        func_registry_instance.func.register(test_function)
-        assert 'test_function' in func_registry_instance.func
-        assert func_registry_instance.func.get('test_function') == test_function
+        func_registry_instance.func.register(func_test)
+        assert 'func_test' in func_registry_instance.func
+        assert func_registry_instance.func.get('func_test') == func_test
 
     def test_register_function_from_category(self, func_registry_instance):
-        func_registry_instance.func.register(test_function)
-        assert 'test_function' in func_registry_instance.func
-        assert func_registry_instance.func.get('test_function') == test_function
+        func_registry_instance.func.register(func_test)
+        assert 'func_test' in func_registry_instance.func
+        assert func_registry_instance.func.get('func_test') == func_test
 
     def test_get_function(self, func_registry_instance):
-        func_registry_instance.func.register(test_function)
-        retrieved_function = func_registry_instance.get('func', 'test_function')
-        assert retrieved_function == test_function
+        func_registry_instance.func.register(func_test)
+        retrieved_function = func_registry_instance.get('func', 'func_test')
+        assert retrieved_function == func_test
 
     def test_get_category(self, func_registry_instance):
-        func_registry_instance.func.register(test_function)
+        func_registry_instance.func.register(func_test)
         retrieved_category = func_registry_instance.get_category('func')
         assert retrieved_category == func_registry_instance.func
 
@@ -63,36 +50,34 @@ class TestFuncRegistry:
             FuncModel(**data)
 
     def test_missing_category(self):
-        data = {'category_name': 'non_existing_category_name', 'name': 'test_function'}
+        data = {'category_name': 'non_existing_category_name', 'name': 'func_test'}
         with pytest.raises(MissingFunctionCategoryName):
             FuncModel(**data)
 
 
-@pytest.mark.parametrize("model_class", [FuncModel])
 class TestFuncModelBase:
-
     @pytest.fixture(autouse=True)
-    def setup(self, func_registry_instance, model_class):
+    def setup(self, func_registry_instance):
         self.func_registry_instance = func_registry_instance
-        self.model_class = model_class
-        self.func_registry_instance.func.register(test_function)
+        self.model_class = FuncModel
+        self.func_registry_instance.func.register(func_test)
 
     def test_valid_model(self):
         data = {
             'category_name': self.model_class.model_fields['category_name'].default,
-            'name': 'test_function'
+            'name': 'func_test'
         }
         model_instance = self.model_class(**data)
         assert model_instance.category_name == self.model_class.model_fields['category_name'].default
-        assert model_instance.name == 'test_function'
-        assert model_instance.func is test_function
+        assert model_instance.name == 'func_test'
+        assert model_instance.func is func_test
 
     def test_to_model(self):
-        data = 'test_function'
+        data = 'func_test'
         model_instance = self.model_class.to_model(data)
         assert model_instance.category_name == self.model_class.model_fields['category_name'].default
-        assert model_instance.name == 'test_function'
-        assert model_instance.func is test_function
+        assert model_instance.name == 'func_test'
+        assert model_instance.func is func_test
 
 
 class TestNotifyModel:
@@ -101,7 +86,7 @@ class TestNotifyModel:
     def setup(self, func_registry_instance):
         self.func_registry_instance = func_registry_instance
         self.model_class = NotifyModel
-        self.func_registry_instance.notify.register(function=test_function)
+        self.func_registry_instance.notify.register(function=func_test)
 
     def test_valid_notify_model_with_short_data(self):
         data = {'text': 'Test NotifyModel initialization'}
@@ -113,15 +98,15 @@ class TestNotifyModel:
     def test_valid_notify_model_with_full_data(self):
         data = {
             'category_name': self.model_class.model_fields['category_name'].default,
-            'name': 'test_function',
+            'name': 'func_test',
             'text': 'Test NotifyModel initialization',
             'show_alert': False,
             'delay': None
         }
         model_instance = self.model_class(**data)
         assert model_instance.category_name == self.model_class.model_fields['category_name'].default
-        assert model_instance.name == 'test_function'
-        assert model_instance.func is test_function
+        assert model_instance.name == 'func_test'
+        assert model_instance.func is func_test
 
     def test_notify_to_model(self):
         data = 'Test NotifyModel initialization'

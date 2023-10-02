@@ -31,6 +31,10 @@ class FuncRegistry:
     func = Category()
     notify = Category()
 
+    def add_category(self, name: str) -> Category:
+        self.__setattr__(name, self.Category())
+        return self.get_category(name)
+
     def get_category(self, name: str) -> Category:
         try:
             return getattr(self, name)
@@ -47,7 +51,7 @@ class FuncRegistry:
         return function
 
 
-async def notify_func(callback: CallbackQuery, button: Keyboard, manager: DialogManager, data: Dict = None):
+async def notify_func(callback: CallbackQuery, data: Dict = None, *args, **kwargs):
     if data:
         if delay := data.get('delay'):
             await asyncio.sleep(delay=delay)
@@ -56,8 +60,8 @@ async def notify_func(callback: CallbackQuery, button: Keyboard, manager: Dialog
     )
 
 
-func_registry = FuncRegistry()
-func_registry.notify.register(function=notify_func)
+function_registry = FuncRegistry()
+function_registry.notify.register(function=notify_func)
 
 
 class FuncModel(YAMLModel, Generic[T]):
@@ -70,18 +74,18 @@ class FuncModel(YAMLModel, Generic[T]):
 
     @property
     def func(self):
-        f = func_registry.get(self.category_name, self.name)
+        f = function_registry.get(self.category_name, self.name)
         return f
 
     @model_validator(mode='after')
     def check_func(self) -> Self:
         category_name = self.category_name
         func_name = self.name
-        f = func_registry.get(category_name, func_name)
+        f = function_registry.get(category_name, func_name)
         return self
 
     @classmethod
-    def to_model(cls, data: Union[str, dict, Self]) -> T:
+    def to_model(cls, data: Union[str, dict, Self]) -> Self:
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
@@ -129,8 +133,8 @@ NotifyField = Annotated[NotifyModel, BeforeValidator(NotifyModel.to_model)]
 
 
 async def func_wrapper(
-    *args,
-    **kwargs
+        *args,
+        **kwargs
 ):
     if pre_func := kwargs.get('pre_func'):
         pre_data = kwargs.get('pre_data')
@@ -144,14 +148,14 @@ async def func_wrapper(
 
 
 async def on_click_wrapper(
-    callback: CallbackQuery,
-    button: Keyboard,
-    manager: DialogManager,
-    on_click_func: Union[Callable, Awaitable],
-    pre_on_click_func: Union[Callable, Awaitable],
-    pre_on_click_data: Optional[Dict],
-    after_on_click_func: Union[Callable, Awaitable],
-    after_on_click_data: Optional[Dict],
+        callback: CallbackQuery,
+        button: Keyboard,
+        manager: DialogManager,
+        on_click_func: Union[Callable, Awaitable],
+        pre_on_click_func: Union[Callable, Awaitable],
+        pre_on_click_data: Optional[Dict],
+        after_on_click_func: Union[Callable, Awaitable],
+        after_on_click_data: Optional[Dict],
 ):
     if pre_on_click_func:
         await pre_on_click_func(callback, pre_on_click_data)

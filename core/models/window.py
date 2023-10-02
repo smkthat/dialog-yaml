@@ -6,8 +6,9 @@ from pydantic import field_validator
 
 from core.models.base import WidgetModel, T
 from core.models.funcs import FuncField
-from core.models.kbd import GroupKeyboardField
+from core.models.widgets.kbd import GroupKeyboardField
 from core.states import YAMLDialogStatesHolder
+from core.utils import clean_empty
 
 
 class WindowModel(WidgetModel):
@@ -20,14 +21,14 @@ class WindowModel(WidgetModel):
     preview_data: FuncField = None
 
     def get_obj(self) -> Window:
-        kwargs = dict(
+        kwargs = clean_empty(dict(
             state=YAMLDialogStatesHolder().get(self.state),
             getter=self.getter.func if self.getter else None,
             parse_mode=self.parse_mode,
             disable_web_page_preview=self.disable_web_page_preview,
             preview_add_transitions=self.preview_add_transitions if self.preview_add_transitions else None,
             preview_data=self.preview_data.func if self.preview_data else None
-        )
+        ))
         return Window(
             *[widget.get_obj() for widget in self.widgets],
             **kwargs

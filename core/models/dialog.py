@@ -4,12 +4,12 @@ from aiogram_dialog import LaunchMode, Dialog
 from pydantic import field_validator
 
 from core.models.funcs import FuncField
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.utils import clean_empty
 
 
 class DialogModel(WidgetModel):
-    windows: list[T]
+    windows: list[WidgetModel]
     on_start: FuncField = None
     on_close: FuncField = None
     on_process_result: FuncField = None

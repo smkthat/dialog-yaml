@@ -54,6 +54,6 @@ class TestWidgetBase:
     @pytest.fixture(autouse=True)
     def setup(self, func_registry_instance, states_holder_instance):
         self.model_parser_class = YAMLModel
-        self.model_parser_class._set_classes(models_classes)
+        self.model_parser_class.set_classes(models_classes)
         self.func_registry_instance = func_registry_instance
         self.states_holder_instance = states_holder_instance

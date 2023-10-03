@@ -1,11 +1,11 @@
 import asyncio
 from types import FunctionType
-from typing import (TypeVar, Generic, Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated)
+from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated)
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Keyboard
-from pydantic import constr, model_validator, BeforeValidator
+from pydantic import constr, model_validator, BeforeValidator, ConfigDict
 
 from core.exceptions import (
     FunctionRegistrationError,
@@ -14,8 +14,6 @@ from core.exceptions import (
     MissingFunctionCategoryName
 )
 from core.models import YAMLModel
-
-T = TypeVar('T', bound='FuncModel')
 
 
 class FuncRegistry:
@@ -64,13 +62,12 @@ function_registry = FuncRegistry()
 function_registry.notify.register(function=notify_func)
 
 
-class FuncModel(YAMLModel, Generic[T]):
+class FuncModel(YAMLModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     category_name: str = 'func'
     name: str
     data: Optional[Dict[Any, Any]] = {}
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @property
     def func(self):
@@ -90,13 +87,15 @@ class FuncModel(YAMLModel, Generic[T]):
             return data
         if isinstance(data, str):
             data = {'name': data}
+        if not data:
+            print()
         return cls(**data)
 
 
 FuncField = Annotated[FuncModel, BeforeValidator(FuncModel.to_model)]
 
 
-class NotifyModel(FuncModel, Generic[T]):
+class NotifyModel(FuncModel):
     category_name: str = 'notify'
     name: str = 'notify_func'
     text: constr(strip_whitespace=True, min_length=1, max_length=200)

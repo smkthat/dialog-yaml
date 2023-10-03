@@ -1,4 +1,4 @@
-from typing import Union, Self, Generic
+from typing import Union, Self
 
 from aiogram_dialog.widgets.kbd import StubScroll, NumberedPager, SwitchPage
 from aiogram_dialog.widgets.kbd.pager import PageDirection
@@ -7,7 +7,7 @@ from aiogram_dialog.widgets.text import ScrollingText
 from core.models.funcs import FuncField, FuncModel
 from core.models.widgets.texts import TextField
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.utils import clean_empty
 
 DEFAULT_PAGER_ID = '__pager__'
@@ -21,7 +21,7 @@ DEFAULT_PAGE_TEXT = TextField(val='{target_page1}', formatted=True)
 DEFAULT_CURRENT_PAGE_TEXT = TextField(val='[ {current_page1} ]', formatted=True)
 
 
-class ScrollingTextModel(WidgetModel, Generic[T]):
+class ScrollingTextModel(WidgetModel):
     id: str
     text: TextField
     page_size: int = 0
@@ -44,7 +44,7 @@ class ScrollingTextModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class StubScrollModel(WidgetModel, Generic[T]):
+class StubScrollModel(WidgetModel):
     id: str
     pages: Union[str, int, FuncField]
     on_page_changed: FuncField = None
@@ -64,7 +64,7 @@ class StubScrollModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class NumberedPagerModel(WidgetModel, Generic[T]):
+class NumberedPagerModel(WidgetModel):
     scroll: str
     id: str = DEFAULT_PAGER_ID
     page_text: TextField = DEFAULT_PAGE_TEXT
@@ -89,7 +89,7 @@ class NumberedPagerModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class SwitchPageModel(WidgetModel, Generic[T]):
+class SwitchPageModel(WidgetModel):
     id: str = DEFAULT_PAGER_ID
     text: TextField
     page: Union[int, PageDirection]
@@ -114,22 +114,22 @@ class SwitchPageModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class FirstPageModel(SwitchPageModel, Generic[T]):
+class FirstPageModel(SwitchPageModel):
     page: int = PageDirection.FIRST
     text: TextField = DEFAULT_FIRST_BUTTON_TEXT
 
 
-class PrevPageModel(SwitchPageModel, Generic[T]):
+class PrevPageModel(SwitchPageModel):
     page: int = PageDirection.PREV
     text: TextField = DEFAULT_PREV_BUTTON_TEXT
 
 
-class CurrentPageModel(SwitchPageModel, Generic[T]):
+class CurrentPageModel(SwitchPageModel):
     page: int = PageDirection.IGNORE
     text: TextField = DEFAULT_CURRENT_PAGE_TEXT
 
 
-class NextPageModel(SwitchPageModel, Generic[T]):
+class NextPageModel(SwitchPageModel):
     page: int = PageDirection.NEXT
     text: TextField = DEFAULT_NEXT_BUTTON_TEXT
 

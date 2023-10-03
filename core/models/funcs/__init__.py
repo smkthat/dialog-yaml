@@ -1,6 +1,6 @@
 from .func import (
     FuncRegistry, function_registry, notify_func, func_wrapper, on_click_wrapper,
-    FuncModel, FuncField, NotifyModel
+    FuncModel, FuncField, NotifyModel, NotifyField
 )
 
 func_classes = dict(

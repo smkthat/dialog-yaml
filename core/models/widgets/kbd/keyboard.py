@@ -1,25 +1,26 @@
 from functools import partial
-from typing import Generic, Union, Self, Any, Annotated
+from typing import Union, Self, Any, Annotated
 
 from aiogram.fsm.state import State
 from aiogram_dialog import StartMode
 from aiogram_dialog.widgets.kbd import Url, Button, SwitchTo, Start, Next, Back, Cancel, Group, ScrollingGroup
 from pydantic import field_validator, BeforeValidator
 
-from core.models.base import WidgetModel, T
-from core.models.funcs import FuncField
-from core.models.funcs.func import NotifyField, FuncModel, function_registry
+from core.models.base import WidgetModel
+from core.models.funcs import FuncField, NotifyField, FuncModel, function_registry
 from core.models.widgets.texts import TextField
 from core.states import YAMLDialogStatesHolder
 from core.utils import clean_empty
 
 
-class ButtonModel(WidgetModel, Generic[T]):
+class ButtonModel(WidgetModel):
     id: str = None
     text: TextField
 
     @classmethod
     def to_model(cls, data: Union[str, dict, Self]) -> Self:
+        if not data:
+            return cls()
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
@@ -27,7 +28,7 @@ class ButtonModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class UrlButtonModel(ButtonModel, Generic[T]):
+class UrlButtonModel(ButtonModel):
     uri: TextField
 
     def get_obj(self) -> Url:
@@ -47,7 +48,7 @@ class UrlButtonModel(ButtonModel, Generic[T]):
         return cls(**data)
 
 
-class CallbackButtonModel(ButtonModel, Generic[T]):
+class CallbackButtonModel(ButtonModel):
     on_click: FuncField = None
     pre_on_click: FuncField = None
     after_on_click: FuncField = None
@@ -92,7 +93,7 @@ class CallbackButtonModel(ButtonModel, Generic[T]):
         return Button(**kwargs)
 
 
-class SwitchToModel(CallbackButtonModel, Generic[T]):
+class SwitchToModel(CallbackButtonModel):
     id: str
     state: State
 
@@ -121,7 +122,7 @@ class SwitchToModel(CallbackButtonModel, Generic[T]):
         return state
 
 
-class StartModel(CallbackButtonModel, Generic[T]):
+class StartModel(CallbackButtonModel):
     id: str
     data: Union[str, int, float, dict[str, Any], list[Any]] = None
     mode: StartMode = StartMode.NORMAL
@@ -158,7 +159,7 @@ class StartModel(CallbackButtonModel, Generic[T]):
             return None
 
 
-class NextModel(CallbackButtonModel, Generic[T]):
+class NextModel(CallbackButtonModel):
     text: TextField = None
 
     def get_obj(self) -> Next:
@@ -172,7 +173,7 @@ class NextModel(CallbackButtonModel, Generic[T]):
         return Next(**kwargs)
 
 
-class BackModel(CallbackButtonModel, Generic[T]):
+class BackModel(CallbackButtonModel):
     text: TextField = None
 
     def get_obj(self) -> Back:
@@ -205,10 +206,10 @@ class CancelModel(CallbackButtonModel):
         return Cancel(**kwargs)
 
 
-class GroupKeyboardModel(WidgetModel, Generic[T]):
+class GroupKeyboardModel(WidgetModel):
     id: str = None
     width: int = None
-    buttons: list[T]
+    buttons: list[WidgetModel]
 
     def get_obj(self) -> Group:
         kwargs = clean_empty(dict(

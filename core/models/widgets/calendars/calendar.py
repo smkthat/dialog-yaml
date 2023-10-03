@@ -2,12 +2,12 @@ from typing import Generic, Union, Self
 
 from aiogram_dialog.widgets.kbd import Calendar
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.funcs import FuncField
 from core.utils import clean_empty
 
 
-class CalendarModel(WidgetModel, Generic[T]):
+class CalendarModel(WidgetModel):
     id: str = None
     on_click: FuncField = None
 

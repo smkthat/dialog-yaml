@@ -1,15 +1,15 @@
-from typing import Generic, Union, Self, Any
+from typing import Union, Self, Any
 
 from aiogram.enums import ContentType
 from aiogram_dialog.widgets.media import DynamicMedia, StaticMedia
 from pydantic import field_validator
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.widgets.texts import TextField
 from core.utils import clean_empty
 
 
-class StaticMediaModel(WidgetModel, Generic[T]):
+class StaticMediaModel(WidgetModel):
     path: TextField = None
     uri: TextField = None
     type: ContentType = ContentType.PHOTO
@@ -41,7 +41,7 @@ class StaticMediaModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class DynamicMediaModel(WidgetModel, Generic[T]):
+class DynamicMediaModel(WidgetModel):
     selector: str
 
     def get_obj(self) -> DynamicMedia:

@@ -11,18 +11,11 @@ class BaseModelCreationError(DialogYamlException):
         super().__init__(message)
 
 
-class SubModelCreationError(DialogYamlException):
-    def __init__(self, model_name, data):
-        self.model_name = model_name
-        message = f'Error while creating YAMLSubModel for {model_name!r} with data {data}'
-        super().__init__(message)
-
-
 class ModelRegistrationError(DialogYamlException):
-    def __init__(self, tag, _class):
+    def __init__(self, tag, model_class, message):
         self.tag = tag
-        self._class = _class
-        message = f'Custom model tag={tag!r} already in use by model class={_class.__name__}'
+        self._class = model_class
+        message.format(tag=tag, model_class=model_class)
         super().__init__(message)
 
 
@@ -55,7 +48,7 @@ class MissingFunctionCategoryName(DialogYamlException):
 
 
 class InvalidTagName(DialogYamlException):
-    def __init__(self, tag: str):
+    def __init__(self, tag: str, message: str):
         self.tag = tag
-        message = f'Tag {self.tag} not provided'
+        message.format(tag=tag)
         super().__init__(message)

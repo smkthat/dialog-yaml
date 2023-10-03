@@ -4,7 +4,7 @@ from aiogram.enums import ParseMode
 from aiogram_dialog import Window
 from pydantic import field_validator
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.funcs import FuncField
 from core.models.widgets.kbd import GroupKeyboardField
 from core.states import YAMLDialogStatesHolder
@@ -12,7 +12,7 @@ from core.utils import clean_empty
 
 
 class WindowModel(WidgetModel):
-    widgets: list[T]
+    widgets: list[WidgetModel]
     state: str
     getter: FuncField = None
     parse_mode: ParseMode = ParseMode.MARKDOWN

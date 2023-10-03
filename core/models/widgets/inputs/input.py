@@ -1,16 +1,15 @@
-from typing import Union, Self, Generic, Any
+from typing import Union, Self
 
 from aiogram.enums import ContentType
 from aiogram_dialog.widgets.input import MessageInput
 from pydantic import field_validator
-from pydantic.dataclasses import dataclass
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.funcs import FuncField
 from core.utils import clean_empty
 
 
-class MessageInputModel(WidgetModel, Generic[T]):
+class MessageInputModel(WidgetModel):
     func: FuncField
     filter: FuncField = None
     content_types: list[ContentType] = [ContentType.ANY]

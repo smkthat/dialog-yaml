@@ -1,14 +1,14 @@
-from typing import (Union, Generic, Optional, Any, Annotated, Self)
+from typing import Union, Optional, Any, Annotated, Self
 
 from aiogram_dialog.widgets.text import Const, Format, Multi, Case, List
 from pydantic import BeforeValidator
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.funcs import FuncModel, FuncField
 from core.utils import clean_empty
 
 
-class TextModel(WidgetModel, Generic[T]):
+class TextModel(WidgetModel):
     formatted: bool = False
     val: str
 

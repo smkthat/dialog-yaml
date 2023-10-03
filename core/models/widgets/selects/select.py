@@ -1,15 +1,15 @@
 import operator
-from typing import Generic, Union, Self
+from typing import Union, Self
 
 from aiogram_dialog.widgets.kbd import Checkbox, Select, Radio, Multiselect
 
-from core.models.base import WidgetModel, T
+from core.models.base import WidgetModel
 from core.models.funcs import FuncModel, FuncField
 from core.models.widgets.texts import TextField, FormatModel
 from core.utils import clean_empty
 
 
-class CheckboxModel(WidgetModel, Generic[T]):
+class CheckboxModel(WidgetModel):
     id: str
     on_state_changed: FuncField = None
     checked: TextField = TextField(val='[✓] Checked')
@@ -39,7 +39,7 @@ class CheckboxModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class SelectModel(WidgetModel, Generic[T]):
+class SelectModel(WidgetModel):
     text: TextField = None
     id: str
     items: Union[str, list, dict]
@@ -72,7 +72,7 @@ class SelectModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class RadioModel(WidgetModel, Generic[T]):
+class RadioModel(WidgetModel):
     id: str
     items: Union[str, list, dict]
     on_state_changed: FuncField = None
@@ -109,7 +109,7 @@ class RadioModel(WidgetModel, Generic[T]):
         return cls(**data)
 
 
-class MultiSelectModel(SelectModel, CheckboxModel, Generic[T]):
+class MultiSelectModel(SelectModel, CheckboxModel):
     min_selected: int = 0
     max_selected: int = 0
     checked: TextField = TextField(val='✓ {item[0]}', formatted=True)

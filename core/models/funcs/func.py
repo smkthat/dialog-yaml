@@ -1,7 +1,6 @@
 import asyncio
 from enum import Enum
-from types import FunctionType
-from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated, Literal)
+from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated)
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
@@ -11,71 +10,126 @@ from pydantic import constr, model_validator, BeforeValidator, ConfigDict
 from core.exceptions import (
     FunctionRegistrationError,
     InvalidFunctionType,
-    MissingFunctionName,
     CategoryNotFoundError, FunctionNotFoundError
 )
 from core.models import YAMLModel
 
 
 class CategoryName(Enum):
-    FUNC = 'func'
-    NOTIFY = 'notify'
+    """The CategoryName class represents the names of categories for functions.
+
+    :cvar func: The name of the 'func' category.
+        This category is used for other functions, such as data getters, setters, filers, conditions, and others.
+    :vartype func: CategoryName
+    :cvar notify: The name of the 'notify' category.
+        This category uses for notification functions
+    :vartype notify: CategoryName
+    """
+
+    func = 'func'
+    notify = 'notify'
 
 
-class Category(Dict):
-    name: str
+class Category:
+    """The Category class represents a category of functions and provides methods for registering and retrieving 
+    functions within the category.
 
-    def __init__(self, name: str):
-        super().__init__()
-        self.name = name
+    :param name: The name of the category, if not provided, the category will be named 'func'.
+    :type name: CategoryName
+
+    :ivar _name: The name of the category
+    :vartype _name: CategoryName
+    """
+
+    _name: str
+    _functions: Dict[str, Union[Callable, Awaitable]]
+
+    def __init__(self, name: Union[str, CategoryName] = CategoryName.func):
+        self._name = name.value if isinstance(name, CategoryName) else name
+        self._functions = {}
+
+    def __str__(self):
+        return f"Category(name={self._name}, functions={self._functions})"
 
     def register(self, function: Union[Callable, Awaitable]):
-        if not isinstance(function, FunctionType):
+        """Register a function within the category.
+
+        :param function: The function to register
+        :type function: Union[Callable, Awaitable]
+
+        :raises FunctionRegistrationError: If the function is already registered within the category
+        :raises InvalidFunctionType: If the function is not a Callable or an Awaitable object
+        """
+
+        if not isinstance(function, (Callable, Awaitable)):
             raise InvalidFunctionType(str(function))
 
         function_name = function.__name__
-        if function_name in self:
+        if function_name in self._functions:
             raise FunctionRegistrationError(
-                self.name, function_name
+                self._name, function_name
             )
 
-        self[function_name] = function
+        self._functions[function_name] = function
 
-    def get(self, function_name: str):
-        function = super().get(function_name)
+    def get(self, function_name: str) -> Union[Callable, Awaitable, None]:
+        """Retrieve a function from the category.
 
-        if function:
-            return function
+        :param function_name: The name of the function to retrieve
+        :type function_name: str
 
-        raise FunctionNotFoundError(self.name, function_name)
+        :return: The retrieved function or None if the function is not registered within the category
+        :rtype: Union[Callable, Awaitable, None]
+        """
+
+        return self._functions.get(function_name)
 
 
 class FuncRegistry:
+    """The FuncRegistry class manages the registration and retrieval of functions.
+
+    :ivar _categories_: A dictionary of categories
+    :vartype _categories_: Dict[str, Category]
+    """
     _categories_: Dict[str, Category] = {
         category_name.value: Category(category_name.value)
         for category_name in CategoryName
     }
 
     @property
-    def func(self):
-        return self._categories_[CategoryName.FUNC.value]
+    def func(self) -> Category:
+        return self._categories_[CategoryName.func.value]
 
     @property
-    def notify(self):
-        return self._categories_[CategoryName.NOTIFY.value]
+    def notify(self) -> Category:
+        return self._categories_[CategoryName.notify.value]
 
-    def register(self, function: Union[Callable, Awaitable], category_name: CategoryName = CategoryName.FUNC):
-        match category_name:
-            case CategoryName.NOTIFY:
-                self.get_category(category_name.value).register(function)
-            case CategoryName.FUNC:
-                self.get_category(category_name.value).register(function)
-            case _:
-                category = self.get_category(category_name.value)
-                if category is not None:
-                    category.register(function)
+    def register(self, function: Union[Callable, Awaitable],
+                 category_name: Union[str, CategoryName] = CategoryName.func) -> None:
+        """Registers a function in the specified category.
 
-    def get_category(self, name: str = CategoryName.FUNC.value) -> Category:
+        :param function: The function to be registered.
+        :type function: Union[Callable, Awaitable]
+        :param category_name: The name of the category. Defaults to `CategoryName.func`.
+        :type category_name: Union[str, CategoryName], optional
+        """
+
+        if isinstance(category_name, CategoryName):
+            category_name = category_name.value
+
+        category = self.get_category(category_name)
+        category.register(function)
+
+    def get_category(self, name: str = CategoryName.func.value) -> Category:
+        """Retrieves the category with the specified name.
+
+        :param name: The name of the category. Defaults to `func`
+        :type name: Union[str, CategoryName]
+
+        :return: The category object.
+        :rtype: Category
+        """
+
         category = self._categories_.get(name)
 
         if category is not None:
@@ -83,8 +137,20 @@ class FuncRegistry:
 
         raise CategoryNotFoundError(name)
 
-    def get_function(self, function_name: str, category_name: str = CategoryName.FUNC.value) -> Union[
-        Callable, Awaitable]:
+    def get_function(
+            self, function_name: str, category_name: str = CategoryName.func.value
+    ) -> Union[Callable, Awaitable]:
+        """Retrieves the function with the specified name from the specified category.
+
+        :param category_name: The name of the category. Defaults to `funcs`
+        :type category_name: Union[str, CategoryName]
+        :param function_name: The name of the function.
+        :type function_name: str
+
+        :return: The function object or `None` if not found.
+        :rtype: Union[Callable, Awaitable, None]
+        """
+
         category = self.get_category(category_name)
         function = category.get(function_name)
         return function
@@ -106,7 +172,7 @@ function_registry.notify.register(function=notify_func)
 class FuncModel(YAMLModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    category_name: str = 'func'
+    category_name: str = CategoryName.func.value
     name: str
     data: Optional[Dict[Any, Any]] = {}
 
@@ -119,7 +185,12 @@ class FuncModel(YAMLModel):
     def check_func(self) -> Self:
         category_name = self.category_name
         func_name = self.name
+
         f = function_registry.get_function(func_name, category_name)
+
+        if f is None:
+            raise FunctionNotFoundError(category_name, func_name)
+
         return self
 
     @classmethod
@@ -128,8 +199,6 @@ class FuncModel(YAMLModel):
             return data
         if isinstance(data, str):
             data = {'name': data}
-        if not data:
-            print()
         return cls(**data)
 
 
@@ -137,7 +206,7 @@ FuncField = Annotated[FuncModel, BeforeValidator(FuncModel.to_model)]
 
 
 class NotifyModel(FuncModel):
-    category_name: str = 'notify'
+    category_name: str = CategoryName.notify.value
     name: str = 'notify_func'
     text: constr(strip_whitespace=True, min_length=1, max_length=200)
     show_alert: bool = False

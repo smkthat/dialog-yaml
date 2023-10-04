@@ -1,9 +1,9 @@
 import pytest
 
-from conftest import func_test, func_registry_instance
+from core import FuncRegistry
 from core.exceptions import (
     MissingFunctionName,
-    MissingFunctionCategoryName,
+    CategoryNotFoundError,
     InvalidFunctionType,
     FunctionRegistrationError
 )
@@ -14,20 +14,33 @@ from core.models.funcs import (
 )
 
 
+@pytest.fixture(autouse=True)
+def func_test():
+    def func():
+        pass
+    return func
+
+
+@pytest.fixture
+def func_registry_instance():
+    func_registry = FuncRegistry()
+    return func_registry
+
+
 class TestFuncRegistry:
     def test_register_function(self, func_registry_instance):
-        func_registry_instance.func.register(func_test)
+        func_registry_instance.register(func_test)
         assert 'func_test' in func_registry_instance.func
-        assert func_registry_instance.func.get('func_test') == func_test
+        assert func_registry_instance.get_function('func_test') == func_test
 
     def test_register_function_from_category(self, func_registry_instance):
         func_registry_instance.func.register(func_test)
         assert 'func_test' in func_registry_instance.func
-        assert func_registry_instance.func.get('func_test') == func_test
+        assert func_registry_instance.get_function('func_test') == func_test
 
     def test_get_function(self, func_registry_instance):
         func_registry_instance.func.register(func_test)
-        retrieved_function = func_registry_instance.get('func', 'func_test')
+        retrieved_function = func_registry_instance.get_function('func_test', 'func')
         assert retrieved_function == func_test
 
     def test_get_category(self, func_registry_instance):
@@ -51,7 +64,7 @@ class TestFuncRegistry:
 
     def test_missing_category(self):
         data = {'category_name': 'non_existing_category_name', 'name': 'func_test'}
-        with pytest.raises(MissingFunctionCategoryName):
+        with pytest.raises(CategoryNotFoundError):
             FuncModel(**data)
 
 

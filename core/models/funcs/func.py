@@ -1,6 +1,7 @@
 import asyncio
+from enum import Enum
 from types import FunctionType
-from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated)
+from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated, Literal)
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
@@ -11,45 +12,85 @@ from core.exceptions import (
     FunctionRegistrationError,
     InvalidFunctionType,
     MissingFunctionName,
-    MissingFunctionCategoryName
+    CategoryNotFoundError, FunctionNotFoundError
 )
 from core.models import YAMLModel
 
 
+class CategoryName(Enum):
+    FUNC = 'func'
+    NOTIFY = 'notify'
+
+
+class Category(Dict):
+    name: str
+
+    def __init__(self, name: str):
+        super().__init__()
+        self.name = name
+
+    def register(self, function: Union[Callable, Awaitable]):
+        if not isinstance(function, FunctionType):
+            raise InvalidFunctionType(str(function))
+
+        function_name = function.__name__
+        if function_name in self:
+            raise FunctionRegistrationError(
+                self.name, function_name
+            )
+
+        self[function_name] = function
+
+    def get(self, function_name: str):
+        function = super().get(function_name)
+
+        if function:
+            return function
+
+        raise FunctionNotFoundError(self.name, function_name)
+
+
 class FuncRegistry:
-    class Category(Dict):
-        def register(self, function: Union[Callable, Awaitable]):
-            if not isinstance(function, FunctionType):
-                raise InvalidFunctionType(str(function))
-            self[function.__name__] = function
+    _categories_: Dict[str, Category] = {
+        category_name.value: Category(category_name.value)
+        for category_name in CategoryName
+    }
 
-        def get(self, function_name: str):
-            return super().get(function_name)
+    @property
+    def func(self):
+        return self._categories_[CategoryName.FUNC.value]
 
-    func = Category()
-    notify = Category()
+    @property
+    def notify(self):
+        return self._categories_[CategoryName.NOTIFY.value]
 
-    def add_category(self, name: str) -> Category:
-        self.__setattr__(name, self.Category())
-        return self.get_category(name)
+    def register(self, function: Union[Callable, Awaitable], category_name: CategoryName = CategoryName.FUNC):
+        match category_name:
+            case CategoryName.NOTIFY:
+                self.get_category(category_name.value).register(function)
+            case CategoryName.FUNC:
+                self.get_category(category_name.value).register(function)
+            case _:
+                category = self.get_category(category_name.value)
+                if category is not None:
+                    category.register(function)
 
-    def get_category(self, name: str) -> Category:
-        try:
-            return getattr(self, name)
-        except AttributeError:
-            raise MissingFunctionCategoryName(name)
+    def get_category(self, name: str = CategoryName.FUNC.value) -> Category:
+        category = self._categories_.get(name)
 
-    def get(self, category_name: str, function_name: str) -> FunctionType:
-        if not function_name:
-            raise MissingFunctionName(category_name)
+        if category is not None:
+            return category
+
+        raise CategoryNotFoundError(name)
+
+    def get_function(self, function_name: str, category_name: str = CategoryName.FUNC.value) -> Union[
+        Callable, Awaitable]:
         category = self.get_category(category_name)
         function = category.get(function_name)
-        if not function:
-            raise FunctionRegistrationError(category_name, function_name)
         return function
 
 
-async def notify_func(callback: CallbackQuery, data: Dict = None, *args, **kwargs):
+async def notify_func(callback: CallbackQuery, data: Dict = None, *args, **kwargs) -> None:
     if data:
         if delay := data.get('delay'):
             await asyncio.sleep(delay=delay)
@@ -71,14 +112,14 @@ class FuncModel(YAMLModel):
 
     @property
     def func(self):
-        f = function_registry.get(self.category_name, self.name)
+        f = function_registry.get_function(self.name, self.category_name)
         return f
 
     @model_validator(mode='after')
     def check_func(self) -> Self:
         category_name = self.category_name
         func_name = self.name
-        f = function_registry.get(category_name, func_name)
+        f = function_registry.get_function(func_name, category_name)
         return self
 
     @classmethod

@@ -19,7 +19,7 @@ import logging
 import re
 from typing import Type, Union, Dict, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from core.exceptions import ModelRegistrationError, InvalidTagName, DialogYamlException
 
@@ -48,7 +48,7 @@ class YAMLModel(BaseModel):
     _models_classes: Dict[str, Type['YAMLModel']] = {}
 
     @classmethod
-    def _is_valid(cls, tag: str, model_class: Type['YAMLModel']) -> bool:
+    def is_valid_tag(cls, tag: str) -> bool:
         if not tag or not isinstance(tag, str):
             raise InvalidTagName(tag, '{tag!r} must be non-empty string')
 
@@ -58,12 +58,22 @@ class YAMLModel(BaseModel):
         if not re.fullmatch(r'[a-zA-Z0-9_-]+', tag):
             raise InvalidTagName(tag, '{tag!r} must contains only latin letters and numbers')
 
+        return True
+
+    @classmethod
+    def is_valid_model_class(cls, tag: str, model_class: Type['YAMLModel']) -> bool:
         if not isinstance(model_class, YAMLModel.__class__):
             raise ModelRegistrationError(
                 tag, model_class,
-                message='class {model_class!r} must be instance of YAMLModel'
+                message='{model_class!r} must be type of YAMLModel'
             )
 
+        return True
+
+    @classmethod
+    def _is_valid(cls, tag: str, model_class: Type['YAMLModel']) -> bool:
+        cls.is_valid_tag(tag)
+        cls.is_valid_model_class(tag, model_class)
         return True
 
     @classmethod
@@ -145,8 +155,14 @@ class YAMLModel(BaseModel):
             raise DialogYamlException("yaml_data must be a non-empty dictionary")
 
         tag = next(iter(yaml_data))  # getting first key
+        cls.is_valid_tag(tag)
         model_class = cls.get_model_class(tag)
         data = yaml_data[tag]
         logger.debug(f'Parse tag {tag!r}: {data}')
-        model = model_class.to_model(data)
+        try:
+            model = model_class.to_model(data)
+        except ValidationError as e:
+            raise DialogYamlException(
+                f'Failed to parse tag {tag!r}: {e}'
+            )
         return model

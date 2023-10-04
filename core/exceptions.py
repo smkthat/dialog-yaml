@@ -4,13 +4,6 @@ class DialogYamlException(RuntimeError):
         super().__init__(message)
 
 
-class BaseModelCreationError(DialogYamlException):
-    def __init__(self, model_name, data):
-        self.model_name = model_name
-        message = f'Error while creating YAMLBaseModel for {model_name!r} with data {data}'
-        super().__init__(message)
-
-
 class ModelRegistrationError(DialogYamlException):
     def __init__(self, tag, model_class, message):
         self.tag = tag
@@ -22,7 +15,15 @@ class ModelRegistrationError(DialogYamlException):
 class FunctionRegistrationError(DialogYamlException):
     def __init__(self, category_name, function_name):
         self.function_name = function_name
-        message = f'Function {function_name!r} not registered in category {category_name!r}'
+        message = 'Function with name {function_name!r} is already registered in {category_name!r} category.'.format(
+            category_name=category_name, function_name=function_name)
+        super().__init__(message)
+
+
+class FunctionNotFoundError(DialogYamlException):
+    def __init__(self, category_name, function_name):
+        self.function_name = function_name
+        message = f'Function {function_name!r} is not registered in {category_name!r} category'
         super().__init__(message)
 
 
@@ -40,10 +41,10 @@ class MissingFunctionName(DialogYamlException):
         super().__init__(message)
 
 
-class MissingFunctionCategoryName(DialogYamlException):
+class CategoryNotFoundError(DialogYamlException):
     def __init__(self, category_name):
         self.category_name = category_name
-        message = f'Category {category_name!r} not found'
+        message = f'Category {category_name!r} not found.'
         super().__init__(message)
 
 

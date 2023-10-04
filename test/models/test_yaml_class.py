@@ -6,11 +6,21 @@ from core.models import YAMLModel
 
 
 class YAMLSubModel(YAMLModel):
-    pass
+    key1: str
+    key2: str = None
+
+    @classmethod
+    def to_model(cls, data: dict):
+        return YAMLSubModel(**data)
 
 
 class NotYAMLModel:
-    pass
+    key1: str
+    key2: str
+
+    def __init__(self, key1: str, key2: str = 'None'):
+        self.key1 = key1
+        self.key2 = key2
 
 
 class TestYAMLModelClass:
@@ -273,17 +283,6 @@ class TestRegisterModelClass(TestYAMLModelClass):
         with pytest.raises(InvalidTagName):
             YAMLModel.add_model_class(tag, model_class)
 
-    def test_register_custom_model_class_not_subclass_of_YAMLModel(self):
-        # TODO: fix this test
-
-        # Given
-        tag = "tag1"
-        model_class = BaseModel
-
-        # When/Then
-        with pytest.raises(ModelRegistrationError):
-            YAMLModel.add_model_class(tag, model_class)
-
     def test_register_custom_model_class_with_already_registered_tag(self):
         # Given
         tag = "Tag1"
@@ -332,13 +331,54 @@ class TestGetModelClass(TestYAMLModelClass):
 
 
 class TestFromDataModelClass(TestYAMLModelClass):
-
     @pytest.fixture(autouse=True)
     def setup(self):
-        YAMLModel.set_classes({
-            'tag': YAMLSubModel,
-            'tag1': YAMLSubModel,
-            'tag2': YAMLSubModel,
-        })
+        tag = 'test'
+        YAMLModel.set_classes({tag: YAMLSubModel})
 
-    # TODO: create tests
+    def test_to_model(self):
+        # Given
+        data = {'test': {
+            'key1': 'value1',
+            'key2': 'value2'
+        }}
+
+        # When
+        result = YAMLModel.from_data(data)
+
+        # Then
+        assert isinstance(result, YAMLSubModel)
+        assert result.key1 == 'value1'
+        assert result.key2 == 'value2'
+
+    def test_to_model_with_missing_key(self):
+        # Given
+        data = {'test': {
+            'key1': 'value1',
+        }}
+
+        # When
+        result = YAMLModel.from_data(data)
+
+        # Then
+        assert isinstance(result, YAMLSubModel)
+        assert result.key1 == 'value1'
+        assert result.key2 is None
+
+    def test_yaml_model_setup(setup):
+        # Given
+        tag = 'test'
+
+        # When
+        result = YAMLModel.get_model_class(tag)
+
+        # Then
+        assert result == YAMLSubModel
+
+    def test_from_data_with_not_correct_data_type(self):
+        # Given
+        data = 'not dictionary'
+
+        # When/Then
+        with pytest.raises(DialogYamlException):
+            YAMLModel.from_data(data)

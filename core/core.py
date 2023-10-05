@@ -6,9 +6,8 @@ from aiogram_dialog import Dialog
 from pydantic import BaseModel
 
 from .reader import YAMLReader
-from .states import YAMLDialogStatesHolder
+from .states import YAMLStatesBuilder
 from .models import YAMLModel
-from .models.base import WidgetModel
 from .models.window import WindowModel
 from .models.dialog import DialogModel
 from .models.funcs import function_registry, FuncRegistry, func_classes
@@ -26,7 +25,7 @@ models_classes = dict(
 
 class DialogYAMLBuilder:
     func_registry: FuncRegistry = function_registry
-    states_holder: YAMLDialogStatesHolder = YAMLDialogStatesHolder()
+    states_holder: YAMLStatesBuilder = YAMLStatesBuilder()
     model_parser = YAMLModel
     model_parser.set_classes(models_classes)
     dialogs: list[Dialog] = []
@@ -48,7 +47,7 @@ class DialogYAMLBuilder:
 
         if data:
             dialog_models = {}
-            cls.states_holder.load_data(data)
+            cls.states_holder.load_states_from_yaml_data(data)
             dialogs_data = data.get('dialogs')
 
             if not dialogs_data or not isinstance(dialogs_data, dict):

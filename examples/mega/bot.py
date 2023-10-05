@@ -23,7 +23,7 @@ async def start(message: Message, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
     await dialog_manager.start(
-        state=dialog_yaml.states_holder['Menu:MAIN'],
+        state=dialog_yaml.states_holder.get_by_name('Menu:MAIN'),
         mode=StartMode.RESET_STACK
     )
 
@@ -46,7 +46,7 @@ async def on_unknown_intent(event: ErrorEvent, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
     await dialog_manager.start(
-        state=dialog_yaml.states_holder['Menu:MAIN'],
+        state=dialog_yaml.states_holder.get_by_name('Menu:MAIN'),
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.SEND,
     )

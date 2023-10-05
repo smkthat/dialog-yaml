@@ -27,6 +27,20 @@ class FunctionNotFoundError(DialogYamlException):
         super().__init__(message)
 
 
+class StatesGroupNotFoundError(DialogYamlException):
+    def __init__(self, group_name):
+        self.group_name = group_name
+        message = f'States group {group_name!r} does not exist.'
+        super().__init__(message)
+
+
+class StateNotFoundError(DialogYamlException):
+    def __init__(self, state_name):
+        self.state_name = state_name
+        message = f'State {state_name!r} does not exist.'
+        super().__init__(message)
+
+
 class InvalidFunctionType(DialogYamlException):
     def __init__(self, function_name):
         self.function_name = function_name
@@ -49,6 +63,13 @@ class CategoryNotFoundError(DialogYamlException):
 
 
 class InvalidTagName(DialogYamlException):
+    def __init__(self, tag: str, message: str):
+        self.tag = tag
+        message.format(tag=tag)
+        super().__init__(message)
+
+
+class InvalidTagDataType(DialogYamlException):
     def __init__(self, tag: str, message: str):
         self.tag = tag
         message.format(tag=tag)

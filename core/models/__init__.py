@@ -1,5 +1,4 @@
-"""
-The `core.models` module provides the YAMLModel class for creating YAML models.
+"""The `core.models` module provides the YAMLModel class for creating YAML models.
 
 YAMLModel is a subclass of Pydantic BaseModel and offers functionality for working with YAML data
 and creating instances of custom model classes based on the YAML data.
@@ -33,16 +32,12 @@ class YAMLModel(BaseModel):
     It provides functionality for working with YAML data and creating instances
     of custom model classes based on the YAML data.
 
-    Features:
-    -----------
     - Allows the registration of custom model classes with unique tags.
     - Provides a method to create instances of custom model classes from YAML data.
     - Supports the retrieval of the registered model class based on the tag.
 
-    Attributes:
-    -----------
-    _models_classes: Dict[str, Type['YAMLModel']]
-        A dictionary that stores the registered model classes with their corresponding tags.
+    :ivar _models_classes: A dictionary that maps tag to model class.
+    :vartype _models_classes: Dict[str, Type['YAMLModel']]
     """
 
     _models_classes: Dict[str, Type['YAMLModel']] = {}
@@ -78,8 +73,7 @@ class YAMLModel(BaseModel):
 
     @classmethod
     def add_model_class(cls, tag: str, model_class: Type['YAMLModel']):
-        """
-        Registers a custom model class with a unique tag.
+        """Registers a custom model class with a unique tag.
 
         :param tag: A unique tag for the custom model class.
         :type tag: Str

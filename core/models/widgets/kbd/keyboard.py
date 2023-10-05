@@ -9,7 +9,7 @@ from pydantic import field_validator, BeforeValidator
 from core.models.base import WidgetModel
 from core.models.funcs import FuncField, NotifyField, FuncModel, function_registry
 from core.models.widgets.texts import TextField
-from core.states import YAMLDialogStatesHolder
+from core.states import YAMLStatesBuilder
 from core.utils import clean_empty
 
 
@@ -116,7 +116,7 @@ class SwitchToModel(CallbackButtonModel):
 
     @field_validator('state', mode='before')
     def validate_state(cls, value) -> State:
-        state = YAMLDialogStatesHolder().get_by_name(value)
+        state = YAMLStatesBuilder().get_by_name(value)
         if not state:
             raise ValueError(f'State "{value}" is declared but not provided.')
         return state
@@ -144,7 +144,7 @@ class StartModel(CallbackButtonModel):
 
     @field_validator('state', mode='before')
     def validate_state(cls, value) -> State:
-        state = YAMLDialogStatesHolder().get_by_name(value)
+        state = YAMLStatesBuilder().get_by_name(value)
         if not state:
             raise ValueError(f'State "{value}" is declared but not provided.')
         return state

@@ -1,10 +1,21 @@
+from typing import Union, Callable, Awaitable
+
 import pytest
 
 from core.exceptions import FunctionRegistrationError, InvalidFunctionType, CategoryNotFoundError
 from core.models.funcs.func import Category, FuncRegistry, CategoryName
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
+def get_test_func() -> Union[Callable, Awaitable]:
+
+    def test_func():
+        pass
+
+    return test_func
+
+
+@pytest.fixture
 def registry() -> FuncRegistry:
     registry = FuncRegistry()
     return registry
@@ -12,10 +23,10 @@ def registry() -> FuncRegistry:
 
 class TestCategory:
 
-    def test_register_function_successfully(self):
+    def test_register_function_successfully(self, get_test_func):
         # Given
         category = Category()
-        function = lambda x: x + 1
+        function = get_test_func
 
         # When
         category.register(function)
@@ -23,10 +34,10 @@ class TestCategory:
         # Then
         assert category.get(function.__name__) == function
 
-    def test_retrieve_function_successfully(self):
+    def test_retrieve_function_successfully(self, get_test_func):
         # Given
         category = Category()
-        function = lambda x: x + 1
+        function = get_test_func
         category.register(function)
 
         # When
@@ -52,10 +63,10 @@ class TestCategory:
         # Then
         assert category._name == custom_name
 
-    def test_register_function_with_same_name_twice(self):
+    def test_register_function_with_same_name_twice(self, get_test_func):
         # Given
         category = Category()
-        function = lambda x: x + 1
+        function = get_test_func
         category.register(function)
 
         # When/Then
@@ -105,9 +116,9 @@ class TestFuncRegistry:
         with pytest.raises(CategoryNotFoundError):
             registry.get_category('nonexistent_category')
 
-    def test_register_function_in_notify_category(self, registry):
+    def test_register_function_in_notify_category(self, registry, get_test_func):
         # Given
-        function = lambda x: x + 1
+        function = get_test_func
 
         # When
         registry.register(function, CategoryName.notify)
@@ -117,10 +128,10 @@ class TestFuncRegistry:
 
     def test_retrieve_function_from_notify_category(self, registry):
         # Given
-        function = lambda x: x + 1
+        function = get_test_func
 
         # When
-        registry.notify._functions = {}
+        # registry.notify._functions = {}
         registry.register(function, CategoryName.notify)
         retrieved_function = registry.get_function(function.__name__, CategoryName.notify.value)
 
@@ -129,7 +140,7 @@ class TestFuncRegistry:
 
     def test_register_function_in_custom_category(self, registry):
         # Given
-        function = lambda x: x + 1
+        function = get_test_func
         custom_category = 'custom'
 
         # When/Then

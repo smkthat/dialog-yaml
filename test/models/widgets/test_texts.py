@@ -1,8 +1,8 @@
 import pytest
 from aiogram_dialog.widgets.text import Const, Format, Multi, Case, List
 
-from conftest import TestWidgetBase
 from core.models.widgets.texts import TextModel, FormatModel, MultiTextModel, CaseModel, ListModel
+from test.models.widgets.conftest import TestWidgetBase
 
 
 class TestText(TestWidgetBase):
@@ -11,18 +11,18 @@ class TestText(TestWidgetBase):
          TextModel, Const),
         ({'text': {
             'val': 'Test text {name}',
-            'when': 'func_test'
+            'when': 'test_func'
         }}, TextModel, Const),
         ({'text': {
             'val': 'Test text {name}',
             'formatted': True,
-            'when': 'func_test'
+            'when': 'test_func'
         }}, TextModel, Format),
         ({'format': 'Test text {name}'},
          FormatModel, Format),
         ({'format': {
             'val': 'Test text {name}',
-            'when': 'func_test'
+            'when': 'test_func'
         }}, FormatModel, Format),
         ({'case': {
             'texts': {True: 'Enabled', False: 'Disabled'},
@@ -30,7 +30,7 @@ class TestText(TestWidgetBase):
         }}, CaseModel, Case),
         ({'case': {
             'texts': {True: 'Enabled', False: 'Disabled'},
-            'selector': {'func': 'func_test'}
+            'selector': {'func': 'test_func'}
         }}, CaseModel, Case),
         ({'multi': {'texts': [
             {'format': 'Test text {name}'},
@@ -39,16 +39,16 @@ class TestText(TestWidgetBase):
         ({'list': {
             'field': {'val': '+ {item.name} - {item.id}', 'formatted': True},
             'items': 'get_data',
-            'when': 'func_test'
+            'when': 'test_func'
         }}, ListModel, List),
         ({'list': {
             'field': {'val': '+ {item.name} - {item.id}', 'formatted': True},
             'items': ['a', 'b', 'c', 'd'],
-            'when': 'func_test'
+            'when': 'test_func'
         }}, ListModel, List),
     ])
     def test_text(self, input_data: dict, expected_model_cls, expected_widget_cls):
-        widget_model = self.model_parser_class.from_data(input_data)
+        widget_model = self.yaml_model.from_data(input_data)
         assert isinstance(widget_model, expected_model_cls)
 
         widget_obj = widget_model.get_obj()

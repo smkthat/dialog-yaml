@@ -15,15 +15,14 @@ def get_empty_yaml_states_builder() -> YAMLStatesBuilder:
 @pytest.fixture
 def get_none_empty_yaml_states_builder() -> YAMLStatesBuilder:
     states_holder = YAMLStatesBuilder()
-    group_name = 'group1'
-    states = {'state1': State('state1'), 'state2': State('state2')}
-    group_class = type(group_name, (StatesGroup,), states)
-    group1 = group_class()
-    states_holder._states_groups_map_ = {
-        'group1': group1,
-        **{state.state: state
-           for state_name, state in states.items()}
-    }
+    states = states_holder.parse_raw_states_from_list({
+        'group1:state1',
+        'group1:state2',
+        'group1:state3',
+        'group2:state1',
+        'group2:state2',
+    })
+    states_holder._states_groups_map_.update(states)
     return states_holder
 
 

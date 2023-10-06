@@ -7,6 +7,7 @@ from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Keyboard
 from pydantic import constr, model_validator, BeforeValidator, ConfigDict
 
+from core.decorators import singleton
 from core.exceptions import (
     FunctionRegistrationError,
     InvalidFunctionType,
@@ -85,16 +86,23 @@ class Category:
         return self._functions.get(function_name)
 
 
+@singleton
 class FuncRegistry:
     """The FuncRegistry class manages the registration and retrieval of functions.
 
     :ivar _categories_: A dictionary of categories
     :vartype _categories_: Dict[str, Category]
     """
-    _categories_: Dict[str, Category] = {
-        category_name.value: Category(category_name.value)
-        for category_name in CategoryName
-    }
+    _categories_: Dict[str, Category]
+
+    def __init__(self):
+        self.clear_categories()
+
+    def clear_categories(self):
+        self._categories_ = {
+            category_name.value: Category(category_name.value)
+            for category_name in CategoryName
+        }
 
     @property
     def func(self) -> Category:

@@ -1,8 +1,8 @@
 import pytest
 from aiogram_dialog.widgets.kbd import Checkbox, Select, Radio, Multiselect
 
-from conftest import TestWidgetBase
 from core.models.widgets.selects import CheckboxModel, SelectModel, RadioModel, MultiSelectModel
+from test.models.widgets.conftest import TestWidgetBase
 
 
 class TestSelect(TestWidgetBase):
@@ -17,33 +17,33 @@ class TestSelect(TestWidgetBase):
             'format': '{item.name} ({item.id})',
             'id': 'sel',
             'items': 'get_data',
-            'item_id_getter': 'func_test',
-            'on_click': 'func_test'
+            'item_id_getter': 'test_func',
+            'on_click': 'test_func'
         }}, SelectModel, Select),
         ({'select': {
             'text': '{item.name} ({item.id})',
             'id': 'sel',
             'items': 'get_data',
-            'item_id_getter': 'func_test',
-            'on_click': 'func_test'
+            'item_id_getter': 'test_func',
+            'on_click': 'test_func'
         }}, SelectModel, Select),
         ({'radio': {
             'checked': '🔘 {item.name}',
             'unchecked': '⚪️ {item.name}',
             'id': 'radio',
             'items': 'get_data',
-            'item_id_getter': 'func_test'
+            'item_id_getter': 'test_func'
         }}, RadioModel, Radio),
         ({'multi_select': {
                 'checked': '✓ {item.name}',
                 'unchecked': '{item.name}',
                 'id': 'multi',
-                'items': 'func_test',
-                'item_id_getter': 'func_test'
+                'items': 'test_func',
+                'item_id_getter': 'test_func'
         }}, MultiSelectModel, Multiselect),
     ])
     def test_select(self, input_data: dict, expected_model_cls, expected_widget_cls):
-        widget_model = self.model_parser_class.from_data(input_data)
+        widget_model = self.yaml_model.from_data(input_data)
         assert isinstance(widget_model, expected_model_cls)
 
         widget_obj = widget_model.get_obj()

@@ -15,15 +15,14 @@ def get_empty_yaml_states_builder() -> YAMLStatesBuilder:
 @pytest.fixture
 def get_none_empty_yaml_states_builder() -> YAMLStatesBuilder:
     states_holder = YAMLStatesBuilder()
-    group_name = 'group1'
-    states = {'state1': State('state1'), 'state2': State('state2')}
-    group_class = type(group_name, (StatesGroup,), states)
-    group1 = group_class()
-    states_holder._states_groups_map_ = {
-        'group1': group1,
-        **{state.state: state
-           for state_name, state in states.items()}
-    }
+    states = states_holder.parse_raw_states_from_list({
+        'group1:state1',
+        'group1:state2',
+        'group1:state3',
+        'group2:state1',
+        'group2:state2',
+    })
+    states_holder._states_groups_map_.update(states)
     return states_holder
 
 
@@ -85,12 +84,22 @@ class TestYAMLStatesHBuilder:
     def test_add_state_to_map_without_group_name(self, get_none_empty_yaml_states_builder):
         # Given
         yaml_states_builder = get_none_empty_yaml_states_builder
-        group_name = 'other_group'
+        none_existed_group_name = None
+        state = State('new_state')
+
+        # When, Then
+        with pytest.raises(StatesGroupNotFoundError):
+            yaml_states_builder.add_state_to_map(none_existed_group_name, state)
+
+    def test_add_state_to_map_with_none_existed_group(self, get_none_empty_yaml_states_builder):
+        # Given
+        yaml_states_builder = get_none_empty_yaml_states_builder
+        none_existed_group_name = 'none_existed_group'
         state = State('new_state', 'group1')
 
         # When, Then
         with pytest.raises(StatesGroupNotFoundError):
-            yaml_states_builder.add_state_to_map(group_name, state)
+            yaml_states_builder.add_state_to_map(none_existed_group_name, state)
 
     def test_add_states_to_map(self, get_none_empty_yaml_states_builder):
         # Given

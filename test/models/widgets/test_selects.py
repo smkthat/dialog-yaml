@@ -43,8 +43,8 @@ class TestSelect(TestWidgetBase):
         }}, MultiSelectModel, Multiselect),
     ])
     def test_select(self, input_data: dict, expected_model_cls, expected_widget_cls):
-        widget_model = self.yaml_model.from_data(input_data)
+        widget_model = self.yaml_model.create_model(input_data)
         assert isinstance(widget_model, expected_model_cls)
 
-        widget_obj = widget_model.get_obj()
+        widget_obj = widget_model.to_object()
         assert isinstance(widget_obj, expected_widget_cls)

@@ -27,11 +27,11 @@ class ScrollingTextModel(WidgetModel):
     page_size: int = 0
     on_page_changed: FuncField = None
 
-    def get_obj(self) -> ScrollingText:
+    def to_object(self) -> ScrollingText:
         kwargs = clean_empty(dict(
             id=self.id,
             page_size=self.page_size,
-            text=self.text.get_obj(),
+            text=self.text.to_object(),
             on_page_changed=self.on_page_changed.func if self.on_page_changed else None,
             when=self.when.func if self.when else None
         ))
@@ -49,7 +49,7 @@ class StubScrollModel(WidgetModel):
     pages: Union[str, int, FuncField]
     on_page_changed: FuncField = None
 
-    def get_obj(self) -> StubScroll:
+    def to_object(self) -> StubScroll:
         kwargs = clean_empty(dict(
             id=self.id,
             pages=self.pages.func if isinstance(self.pages, FuncModel) else self.pages,
@@ -70,12 +70,12 @@ class NumberedPagerModel(WidgetModel):
     page_text: TextField = DEFAULT_PAGE_TEXT
     current_page_text: TextField = DEFAULT_CURRENT_PAGE_TEXT
 
-    def get_obj(self) -> NumberedPager:
+    def to_object(self) -> NumberedPager:
         kwargs = clean_empty(dict(
             id=self.id,
             scroll=self.scroll,
-            page_text=self.page_text.get_obj(),
-            current_page_text=self.current_page_text.get_obj(),
+            page_text=self.page_text.to_object(),
+            current_page_text=self.current_page_text.to_object(),
             when=self.when.func if self.when else None
         ))
         return NumberedPager(**kwargs)
@@ -95,12 +95,12 @@ class SwitchPageModel(WidgetModel):
     page: Union[int, PageDirection]
     scroll: str
 
-    def get_obj(self) -> SwitchPage:
+    def to_object(self) -> SwitchPage:
         kwargs = clean_empty(dict(
             id=self.id,
             page=self.page,
             scroll=self.scroll,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             when=self.when.func if self.when else None
         ))
         return SwitchPage(**kwargs)

@@ -3,12 +3,15 @@ class DialogYamlException(RuntimeError):
         self.message = message
         super().__init__(message)
 
+    def __str__(self):
+        return self.message
+
 
 class ModelRegistrationError(DialogYamlException):
     def __init__(self, tag, model_class, message):
         self.tag = tag
         self._class = model_class
-        message.format(tag=tag, model_class=model_class)
+        message = message.format(tag=tag, model_class=model_class)
         super().__init__(message)
 
 
@@ -65,12 +68,12 @@ class CategoryNotFoundError(DialogYamlException):
 class InvalidTagName(DialogYamlException):
     def __init__(self, tag: str, message: str):
         self.tag = tag
-        message.format(tag=tag)
+        message = message.format(tag=tag)
         super().__init__(message)
 
 
 class InvalidTagDataType(DialogYamlException):
     def __init__(self, tag: str, message: str):
         self.tag = tag
-        message.format(tag=tag)
+        message = message.format(tag=tag)
         super().__init__(message)

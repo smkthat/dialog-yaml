@@ -16,10 +16,10 @@ class StaticMediaModel(WidgetModel):
     use_pipe: bool = False
     media_params: dict[str, Any] = None
 
-    def get_obj(self) -> StaticMedia:
+    def to_object(self) -> StaticMedia:
         kwargs = clean_empty(dict(
-            path=self.path.get_obj() if self.path else None,
-            url=self.uri.get_obj() if self.uri else None,
+            path=self.path.to_object() if self.path else None,
+            url=self.uri.to_object() if self.uri else None,
             type=self.type,
             use_pipe=self.use_pipe,
             media_params=self.media_params,
@@ -44,7 +44,7 @@ class StaticMediaModel(WidgetModel):
 class DynamicMediaModel(WidgetModel):
     selector: str
 
-    def get_obj(self) -> DynamicMedia:
+    def to_object(self) -> DynamicMedia:
         kwargs = clean_empty(dict(
             when=self.when.func if self.when else None,
             selector=self.selector

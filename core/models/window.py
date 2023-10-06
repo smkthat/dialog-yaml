@@ -4,14 +4,14 @@ from aiogram.enums import ParseMode
 from aiogram_dialog import Window
 from pydantic import field_validator
 
-from core.models.base import WidgetModel
+from core.models.base import YAMLModel, WidgetModel
 from core.models.funcs import FuncField
 from core.models.widgets.kbd import GroupKeyboardField
 from core.states import YAMLStatesBuilder
 from core.utils import clean_empty
 
 
-class WindowModel(WidgetModel):
+class WindowModel(YAMLModel):
     widgets: list[WidgetModel]
     state: str
     getter: FuncField = None
@@ -20,7 +20,7 @@ class WindowModel(WidgetModel):
     preview_add_transitions: GroupKeyboardField = None
     preview_data: FuncField = None
 
-    def get_obj(self) -> Window:
+    def to_object(self) -> Window:
         kwargs = clean_empty(dict(
             state=YAMLStatesBuilder().get_by_name(self.state),
             getter=self.getter.func if self.getter else None,
@@ -30,7 +30,7 @@ class WindowModel(WidgetModel):
             preview_data=self.preview_data.func if self.preview_data else None
         ))
         return Window(
-            *[widget.get_obj() for widget in self.widgets],
+            *[widget.to_object() for widget in self.widgets],
             **kwargs
         )
 

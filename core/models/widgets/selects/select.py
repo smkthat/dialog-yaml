@@ -16,10 +16,10 @@ class CheckboxModel(WidgetModel):
     unchecked: TextField = TextField(val='[ ] Unchecked')
     default: bool = True
 
-    def get_obj(self) -> Checkbox:
+    def to_object(self) -> Checkbox:
         args = [
-            self.checked.get_obj(),
-            self.unchecked.get_obj(),
+            self.checked.to_object(),
+            self.unchecked.to_object(),
         ]
         kwargs = clean_empty(dict(
             id=self.id,
@@ -46,14 +46,14 @@ class SelectModel(WidgetModel):
     item_id_getter: Union[int, str]
     on_click: FuncField = None
 
-    def get_obj(self) -> Select:
+    def to_object(self) -> Select:
         item_id_getter = self.item_id_getter
         if isinstance(item_id_getter, int):
             item_id_getter = operator.itemgetter(item_id_getter)
         if isinstance(item_id_getter, str):
             item_id_getter = FuncModel.to_model(item_id_getter).func
         kwargs = clean_empty(dict(
-            text=self.text.get_obj(),
+            text=self.text.to_object(),
             id=self.id,
             items=self.items,
             item_id_getter=item_id_getter,
@@ -80,10 +80,10 @@ class RadioModel(WidgetModel):
     unchecked: TextField = TextField(val='{item}')
     item_id_getter: Union[int, str, FuncField]
 
-    def get_obj(self) -> Radio:
+    def to_object(self) -> Radio:
         args = [
-            self.checked.get_obj(),
-            self.unchecked.get_obj(),
+            self.checked.to_object(),
+            self.unchecked.to_object(),
         ]
         item_id_getter = self.item_id_getter
         if isinstance(item_id_getter, int):
@@ -115,15 +115,15 @@ class MultiSelectModel(SelectModel, CheckboxModel):
     checked: TextField = TextField(val='✓ {item[0]}', formatted=True)
     unchecked: TextField = TextField(val='{item[0]}', formatted=True)
 
-    def get_obj(self) -> Multiselect:
+    def to_object(self) -> Multiselect:
         item_id_getter = self.item_id_getter
         if isinstance(item_id_getter, int):
             item_id_getter = operator.itemgetter(item_id_getter)
         if isinstance(item_id_getter, str):
             item_id_getter = FuncModel.to_model(item_id_getter).func
         kwargs = clean_empty(dict(
-            checked_text=self.checked.get_obj(),
-            unchecked_text=self.unchecked.get_obj(),
+            checked_text=self.checked.to_object(),
+            unchecked_text=self.unchecked.to_object(),
             id=self.id,
             items=self.items,
             item_id_getter=item_id_getter,

@@ -1,16 +1,21 @@
+from typing import Self
+
 import pytest
-from pydantic import BaseModel
+from aiogram_dialog.api.internal import Widget
 
 from core.exceptions import ModelRegistrationError, InvalidTagName, DialogYamlException
-from core.models import YAMLModel
+from core.models import YAMLModelFactory, YAMLModel
 
 
 class YAMLSubModel(YAMLModel):
+    def to_object(self) -> Widget:
+        pass
+
     key1: str
     key2: str = None
 
     @classmethod
-    def to_model(cls, data: dict):
+    def to_model(cls, data: dict) -> Self:
         return YAMLSubModel(**data)
 
 
@@ -26,7 +31,7 @@ class NotYAMLModel:
 class TestYAMLModelClass:
     @pytest.fixture(autouse=True)
     def setup(self):
-        YAMLModel._models_classes = {}
+        YAMLModelFactory._models_classes = {}
 
 
 class TestIsValidModelClass(TestYAMLModelClass):
@@ -36,7 +41,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
         model_class = YAMLModel
 
         # When
-        result = YAMLModel._is_valid(tag, model_class)
+        result = YAMLModelFactory._is_valid(tag, model_class)
 
         # Then
         assert result is True
@@ -47,7 +52,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
         model_class = YAMLModel
 
         # When
-        result = YAMLModel._is_valid(tag, model_class)
+        result = YAMLModelFactory._is_valid(tag, model_class)
 
         # Then
         assert result is True
@@ -58,7 +63,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
         model_class = YAMLModel
 
         # When
-        result = YAMLModel._is_valid(tag, model_class)
+        result = YAMLModelFactory._is_valid(tag, model_class)
 
         # Then
         assert result is True
@@ -69,7 +74,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
         model_class = YAMLModel
 
         # When
-        result = YAMLModel._is_valid(tag, model_class)
+        result = YAMLModelFactory._is_valid(tag, model_class)
 
         # Then
         assert result is True
@@ -80,7 +85,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
         model_class = YAMLModel
 
         # When
-        result = YAMLModel._is_valid(tag, model_class)
+        result = YAMLModelFactory._is_valid(tag, model_class)
 
         # Then
         assert result is True
@@ -92,7 +97,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
 
         # When, Then
         with pytest.raises(InvalidTagName):
-            YAMLModel._is_valid(tag, model_class)
+            YAMLModelFactory._is_valid(tag, model_class)
 
     def test_non_string_tag_raises_invalid_tag_name(self):
         # Given
@@ -101,7 +106,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
 
         # When, Then
         with pytest.raises(InvalidTagName):
-            YAMLModel._is_valid(tag, model_class)
+            YAMLModelFactory._is_valid(tag, model_class)
 
     def test_tag_with_only_digits_raises_invalid_tag_name(self):
         # Given
@@ -110,7 +115,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
 
         # When, Then
         with pytest.raises(InvalidTagName):
-            YAMLModel._is_valid(tag, model_class)
+            YAMLModelFactory._is_valid(tag, model_class)
 
     def test_tag_with_special_characters_raises_invalid_tag_name(self):
         # Given
@@ -119,7 +124,7 @@ class TestIsValidModelClass(TestYAMLModelClass):
 
         # When, Then
         with pytest.raises(InvalidTagName):
-            YAMLModel._is_valid(tag, model_class)
+            YAMLModelFactory._is_valid(tag, model_class)
 
 
 class TestSetModelClasses(TestYAMLModelClass):
@@ -132,30 +137,30 @@ class TestSetModelClasses(TestYAMLModelClass):
         }
 
         # When
-        YAMLModel.set_classes(models_classes)
+        YAMLModelFactory.set_classes(models_classes)
 
         # Then
-        assert YAMLModel._models_classes == models_classes
+        assert YAMLModelFactory._models_classes == models_classes
 
     def test_set_empty_dictionary_of_model_classes(self):
         # Given
         models_classes = {}
 
         # When
-        YAMLModel.set_classes(models_classes)
+        YAMLModelFactory.set_classes(models_classes)
 
         # Then
-        assert YAMLModel._models_classes == models_classes
+        assert YAMLModelFactory._models_classes == models_classes
 
     def test_set_dictionary_with_non_string_key(self):
         # Given
         models_classes = {
-            123: YAMLModel
+            123: YAMLModelFactory
         }
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_set_dictionary_with_non_yamlmodel_value(self):
         # Given
@@ -165,27 +170,27 @@ class TestSetModelClasses(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_set_dictionary_with_key_only_digits(self):
         # Given
         models_classes = {
-            '123': YAMLModel
+            '123': YAMLModelFactory
         }
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_set_dictionary_with_key_special_characters(self):
         # Given
         models_classes = {
-            'tag!': YAMLModel
+            'tag!': YAMLModelFactory
         }
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_raise_dialog_yaml_exception_when_models_classes_not_dictionary(self):
         # Given
@@ -193,18 +198,18 @@ class TestSetModelClasses(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_raise_dialog_yaml_exception_when_models_classes_not_dictionary_of_strings_to_yamlmodel_classes(self):
         # Given
         models_classes = {
-            'tag1': YAMLModel,
+            'tag1': YAMLModelFactory,
             'tag2': 'NotYAMLModel'
         }
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
     def test_raise_dialog_yaml_exception_when_models_classes_is_none(self):
         # Given
@@ -212,7 +217,7 @@ class TestSetModelClasses(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.set_classes(models_classes)
+            YAMLModelFactory.set_classes(models_classes)
 
 
 class TestRegisterModelClass(TestYAMLModelClass):
@@ -223,10 +228,10 @@ class TestRegisterModelClass(TestYAMLModelClass):
         model_class1 = YAMLModel
 
         # When
-        YAMLModel.add_model_class(tag, model_class1)
+        YAMLModelFactory.add_model_class(tag, model_class1)
 
         # Then
-        assert YAMLModel.get_model_class(tag) == model_class1
+        assert YAMLModelFactory.get_model_class(tag) == model_class1
 
     def test_register_multiple_custom_model_classes_with_unique_tags(self):
         # Given
@@ -236,12 +241,12 @@ class TestRegisterModelClass(TestYAMLModelClass):
         model_class2 = YAMLSubModel
 
         # When
-        YAMLModel.add_model_class(tag1, model_class1)
-        YAMLModel.add_model_class(tag2, model_class2)
+        YAMLModelFactory.add_model_class(tag1, model_class1)
+        YAMLModelFactory.add_model_class(tag2, model_class2)
 
         # Then
-        assert YAMLModel.get_model_class(tag1) == model_class1
-        assert YAMLModel.get_model_class(tag2) == model_class2
+        assert YAMLModelFactory.get_model_class(tag1) == model_class1
+        assert YAMLModelFactory.get_model_class(tag2) == model_class2
 
     def test_register_custom_model_class_with_previously_registered_tag_and_different_class(self):
         # Given
@@ -250,11 +255,11 @@ class TestRegisterModelClass(TestYAMLModelClass):
         model_class2 = YAMLSubModel
 
         # When
-        YAMLModel.add_model_class(tag, model_class1)
+        YAMLModelFactory.add_model_class(tag, model_class1)
 
         # Then
         with pytest.raises(ModelRegistrationError):
-            YAMLModel.add_model_class(tag, model_class2)
+            YAMLModelFactory.add_model_class(tag, model_class2)
 
     def test_register_custom_model_class_with_tag_containing_special_characters(self):
         # Given
@@ -263,7 +268,7 @@ class TestRegisterModelClass(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.add_model_class(tag, model_class)
+            YAMLModelFactory.add_model_class(tag, model_class)
 
     def test_register_custom_model_class_with_empty_tag(self):
         # Given
@@ -272,7 +277,7 @@ class TestRegisterModelClass(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.add_model_class(tag, model_class)
+            YAMLModelFactory.add_model_class(tag, model_class)
 
     def test_register_custom_model_class_with_non_string_tag(self):
         # Given
@@ -281,7 +286,7 @@ class TestRegisterModelClass(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.add_model_class(tag, model_class)
+            YAMLModelFactory.add_model_class(tag, model_class)
 
     def test_register_custom_model_class_with_already_registered_tag(self):
         # Given
@@ -290,11 +295,11 @@ class TestRegisterModelClass(TestYAMLModelClass):
         model_class2 = YAMLSubModel
 
         # When
-        YAMLModel.add_model_class(tag, model_class1)
+        YAMLModelFactory.add_model_class(tag, model_class1)
 
         # Then
         with pytest.raises(ModelRegistrationError):
-            YAMLModel.add_model_class(tag, model_class2)
+            YAMLModelFactory.add_model_class(tag, model_class2)
 
     def test_register_custom_model_class_with_none_tag(self):
         # Given
@@ -303,7 +308,7 @@ class TestRegisterModelClass(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(InvalidTagName):
-            YAMLModel.add_model_class(tag, model_class)
+            YAMLModelFactory.add_model_class(tag, model_class)
 
 
 class TestGetModelClass(TestYAMLModelClass):
@@ -311,10 +316,10 @@ class TestGetModelClass(TestYAMLModelClass):
         # Given
         tag = 'tag'
         model_class = YAMLModel
-        YAMLModel._models_classes = {tag: model_class}
+        YAMLModelFactory._models_classes = {tag: model_class}
 
         # When
-        result = YAMLModel.get_model_class(tag)
+        result = YAMLModelFactory.get_model_class(tag)
 
         # Then
         assert result == model_class
@@ -324,7 +329,7 @@ class TestGetModelClass(TestYAMLModelClass):
         tag = 'tag'
 
         # When
-        result = YAMLModel.get_model_class(tag)
+        result = YAMLModelFactory.get_model_class(tag)
 
         # Then
         assert result is None
@@ -334,7 +339,7 @@ class TestFromDataModelClass(TestYAMLModelClass):
     @pytest.fixture(autouse=True)
     def setup(self):
         tag = 'test'
-        YAMLModel.set_classes({tag: YAMLSubModel})
+        YAMLModelFactory.set_classes({tag: YAMLSubModel})
 
     def test_to_model(self):
         # Given
@@ -344,7 +349,7 @@ class TestFromDataModelClass(TestYAMLModelClass):
         }}
 
         # When
-        result = YAMLModel.from_data(data)
+        result = YAMLModelFactory.create_model(data)
 
         # Then
         assert isinstance(result, YAMLSubModel)
@@ -358,7 +363,7 @@ class TestFromDataModelClass(TestYAMLModelClass):
         }}
 
         # When
-        result = YAMLModel.from_data(data)
+        result = YAMLModelFactory.create_model(data)
 
         # Then
         assert isinstance(result, YAMLSubModel)
@@ -370,7 +375,7 @@ class TestFromDataModelClass(TestYAMLModelClass):
         tag = 'test'
 
         # When
-        result = YAMLModel.get_model_class(tag)
+        result = YAMLModelFactory.get_model_class(tag)
 
         # Then
         assert result == YAMLSubModel
@@ -381,4 +386,4 @@ class TestFromDataModelClass(TestYAMLModelClass):
 
         # When/Then
         with pytest.raises(DialogYamlException):
-            YAMLModel.from_data(data)
+            YAMLModelFactory.create_model(data)

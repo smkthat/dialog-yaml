@@ -6,6 +6,7 @@ from aiogram_dialog import StartMode
 from aiogram_dialog.widgets.kbd import Url, Button, SwitchTo, Start, Next, Back, Cancel, Group, ScrollingGroup
 from pydantic import field_validator, BeforeValidator
 
+from core.models import YAMLModelFactory
 from core.models.base import WidgetModel
 from core.models.funcs import FuncField, NotifyField, FuncModel, function_registry
 from core.models.widgets.texts import TextField
@@ -31,10 +32,10 @@ class ButtonModel(WidgetModel):
 class UrlButtonModel(ButtonModel):
     uri: TextField
 
-    def get_obj(self) -> Url:
+    def to_object(self) -> Url:
         kwargs = clean_empty(dict(
-            text=self.text.get_obj() if self.text else None,
-            url=self.uri.get_obj() if self.uri else None,
+            text=self.text.to_object() if self.text else None,
+            url=self.uri.to_object() if self.uri else None,
             when=self.when.func if self.when else None
         ))
         return Url(**kwargs)
@@ -82,10 +83,10 @@ class CallbackButtonModel(ButtonModel):
             on_click = partial(wrap_functions, **partial_data)
         return on_click
 
-    def get_obj(self) -> Button:
+    def to_object(self) -> Button:
         partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             id=self.id,
             on_click=partial_on_click,
             when=self.when.func if self.when else None
@@ -97,11 +98,11 @@ class SwitchToModel(CallbackButtonModel):
     id: str
     state: State
 
-    def get_obj(self) -> SwitchTo:
+    def to_object(self) -> SwitchTo:
         partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             on_click=partial_on_click,
             when=self.when.func if self.when else None,
             state=self.state
@@ -128,12 +129,12 @@ class StartModel(CallbackButtonModel):
     mode: StartMode = StartMode.NORMAL
     state: State
 
-    def get_obj(self) -> Start:
+    def to_object(self) -> Start:
         on_click = self.on_click.func if self.on_click else None
         partial_on_click = self.get_partial_on_click(on_click)
         kwargs = clean_empty(dict(
             id=self.id,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             on_click=partial_on_click,
             when=self.when.func if self.when else None,
             state=self.state,
@@ -162,11 +163,11 @@ class StartModel(CallbackButtonModel):
 class NextModel(CallbackButtonModel):
     text: TextField = None
 
-    def get_obj(self) -> Next:
+    def to_object(self) -> Next:
         partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             on_click=partial_on_click,
             when=self.when.func if self.when else None,
         ))
@@ -176,11 +177,11 @@ class NextModel(CallbackButtonModel):
 class BackModel(CallbackButtonModel):
     text: TextField = None
 
-    def get_obj(self) -> Back:
+    def to_object(self) -> Back:
         partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             on_click=partial_on_click,
             when=self.when.func if self.when else None,
         ))
@@ -191,14 +192,14 @@ class CancelModel(CallbackButtonModel):
     text: TextField = None
     result: Union[FuncField, Any] = None
 
-    def get_obj(self) -> Cancel:
+    def to_object(self) -> Cancel:
         result = self.result
         if isinstance(result, FuncModel):
             result = result.func
         partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
-            text=self.text.get_obj() if self.text else None,
+            text=self.text.to_object() if self.text else None,
             on_click=partial_on_click,
             when=self.when.func if self.when else None,
             result=result
@@ -211,14 +212,14 @@ class GroupKeyboardModel(WidgetModel):
     width: int = None
     buttons: list[WidgetModel]
 
-    def get_obj(self) -> Group:
+    def to_object(self) -> Group:
         kwargs = clean_empty(dict(
             id=self.id,
             width=self.width,
             when=self.when.func if self.when else None
         ))
         return Group(
-            *[button.get_obj() for button in self.buttons],
+            *[button.to_object() for button in self.buttons],
             **kwargs
         )
 
@@ -232,7 +233,7 @@ class GroupKeyboardModel(WidgetModel):
                     buttons_getter_func = function_registry.func.get(buttons)
                     buttons = buttons_getter_func()
                 if isinstance(buttons, list):
-                    data['buttons'] = [cls.from_data(button_data) for button_data in buttons]
+                    data['buttons'] = [YAMLModelFactory.create_model(button_data) for button_data in buttons]
         return cls(**data)
 
 
@@ -254,7 +255,7 @@ class ScrollingGroupKeyboardModel(GroupKeyboardModel):
     hide_on_single_page: bool = False
     hide_pager: bool = False
 
-    def get_obj(self) -> ScrollingGroup:
+    def to_object(self) -> ScrollingGroup:
         kwargs = clean_empty(dict(
             id=self.id,
             height=self.height,
@@ -264,6 +265,6 @@ class ScrollingGroupKeyboardModel(GroupKeyboardModel):
             hide_pager=self.hide_pager
         ))
         return ScrollingGroup(
-            *[button.get_obj() for button in self.buttons],
+            *[button.to_object() for button in self.buttons],
             **kwargs
         )

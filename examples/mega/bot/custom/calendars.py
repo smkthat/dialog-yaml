@@ -64,7 +64,7 @@ class CustomCalendar(Calendar):
 
 
 class CustomCalendarModel(CalendarModel):
-    def get_obj(self) -> CustomCalendar:
+    def to_object(self) -> CustomCalendar:
         kwargs = clean_empty(dict(
             id=self.id,
             on_click=self.on_click.func if self.on_click else None,

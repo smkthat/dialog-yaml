@@ -3,6 +3,7 @@ from typing import Union, Optional, Any, Annotated, Self
 from aiogram_dialog.widgets.text import Const, Format, Multi, Case, List
 from pydantic import BeforeValidator
 
+from core.models import YAMLModelFactory
 from core.models.base import WidgetModel
 from core.models.funcs import FuncModel, FuncField
 from core.utils import clean_empty
@@ -12,7 +13,7 @@ class TextModel(WidgetModel):
     formatted: bool = False
     val: str
 
-    def get_obj(self) -> Union[Const, Format]:
+    def to_object(self) -> Union[Const, Format]:
         kwargs = clean_empty(dict(
             when=self.when.func if self.when else None,
             text=self.val
@@ -43,13 +44,13 @@ class MultiTextModel(WidgetModel):
     texts: list[TextField]
     sep: Optional[str] = '\n'
 
-    def get_obj(self) -> Multi:
+    def to_object(self) -> Multi:
         kwargs = clean_empty(dict(
             when=self.when.func if self.when else None,
             sep=self.sep
         ))
         return Multi(
-            *[text.get_obj() for text in self.texts],
+            *[text.to_object() for text in self.texts],
             **kwargs
         )
 
@@ -58,7 +59,7 @@ class MultiTextModel(WidgetModel):
         if isinstance(data, cls):
             return Self
         if texts := data.get('texts'):
-            data['texts'] = [cls.from_data(text_data) for text_data in texts]
+            data['texts'] = [YAMLModelFactory.create_model(text_data) for text_data in texts]
         return cls(**data)
 
 
@@ -66,9 +67,9 @@ class CaseModel(WidgetModel):
     texts: dict[Any, TextField]
     selector: Union[str, FuncField]
 
-    def get_obj(self) -> Case:
+    def to_object(self) -> Case:
         kwargs = clean_empty(dict(
-            texts={item: value.get_obj() for item, value in self.texts.items()},
+            texts={item: value.to_object() for item, value in self.texts.items()},
             selector=self.selector.func if isinstance(self.selector, FuncModel) else self.selector,
             when=self.when.func if self.when else None,
         ))
@@ -85,7 +86,7 @@ class CaseModel(WidgetModel):
             }
         if selector := data.get('selector'):
             if isinstance(selector, dict):
-                data['selector'] = cls.from_data(selector)
+                data['selector'] = YAMLModelFactory.create_model(selector)
         return cls(**data)
 
 
@@ -94,9 +95,9 @@ class ListModel(WidgetModel):
     items: Union[str, list, FuncField, dict]
     sep: Optional[str] = "\n"
 
-    def get_obj(self) -> List:
+    def to_object(self) -> List:
         kwargs = clean_empty(dict(
-            field=self.field.get_obj(),
+            field=self.field.to_object(),
             items=self.items.func if isinstance(self.items, FuncModel) else self.items,
             sep=self.sep,
             when=self.when.func if self.when else None

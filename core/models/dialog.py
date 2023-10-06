@@ -4,12 +4,12 @@ from aiogram_dialog import LaunchMode, Dialog
 from pydantic import field_validator
 
 from core.models.funcs import FuncField
-from core.models.base import WidgetModel
+from core.models.base import YAMLModel
 from core.utils import clean_empty
 
 
-class DialogModel(WidgetModel):
-    windows: list[WidgetModel]
+class DialogModel(YAMLModel):
+    windows: list[YAMLModel]
     on_start: FuncField = None
     on_close: FuncField = None
     on_process_result: FuncField = None
@@ -17,7 +17,7 @@ class DialogModel(WidgetModel):
     getter: FuncField = None
     preview_data: FuncField = None
 
-    def get_obj(self) -> Dialog:
+    def to_object(self) -> Dialog:
         kwargs = clean_empty(dict(
             on_start=self.on_start.func if self.on_start else None,
             on_close=self.on_close.func if self.on_close else None,
@@ -27,7 +27,7 @@ class DialogModel(WidgetModel):
             preview_data=self.preview_data.func if self.getter else None
         ))
         return Dialog(
-            *[window.get_obj() for window in self.windows],
+            *[window.to_object() for window in self.windows],
             **kwargs
         )
 

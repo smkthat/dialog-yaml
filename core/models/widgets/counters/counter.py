@@ -15,7 +15,7 @@ class ProgressModel(WidgetModel):
     filled: TextField = None
     empty: TextField = None
 
-    def get_obj(self) -> Progress:
+    def to_object(self) -> Progress:
         kwargs = clean_empty(dict(
             field=self.field.val,
             width=self.width,
@@ -47,12 +47,12 @@ class CounterModel(WidgetModel):
     on_text_click: FuncField = None
     on_value_changed: FuncField = None
 
-    def get_obj(self) -> Counter:
+    def to_object(self) -> Counter:
         kwargs = clean_empty(dict(
             id=self.id,
-            plus=self.plus.get_obj() if self.plus else None,
-            minus=self.minus.get_obj() if self.minus else None,
-            text=self.text.get_obj() if self.text else None,
+            plus=self.plus.to_object() if self.plus else None,
+            minus=self.minus.to_object() if self.minus else None,
+            text=self.text.to_object() if self.text else None,
             min_value=self.min_value,
             max_value=self.max_value,
             increment=self.increment,

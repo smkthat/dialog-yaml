@@ -14,7 +14,7 @@ class MessageInputModel(WidgetModel):
     filter: FuncField = None
     content_types: list[ContentType] = [ContentType.ANY]
 
-    def get_obj(self) -> MessageInput:
+    def to_object(self) -> MessageInput:
         kwargs = clean_empty(dict(
             func=self.func.func if self.func else None,
             filter=self.filter.func if self.filter else None,

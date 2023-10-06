@@ -7,7 +7,8 @@ from pydantic import BaseModel
 
 from .reader import YAMLReader
 from .states import YAMLStatesBuilder
-from .models import YAMLModel
+from .models import YAMLModelFactory
+from .models.base import YAMLModel
 from .models.window import WindowModel
 from .models.dialog import DialogModel
 from .models.funcs import function_registry, FuncRegistry, func_classes
@@ -26,8 +27,8 @@ models_classes = dict(
 class DialogYAMLBuilder:
     func_registry: FuncRegistry = function_registry
     states_holder: YAMLStatesBuilder = YAMLStatesBuilder()
-    model_parser = YAMLModel
-    model_parser.set_classes(models_classes)
+    model_fabric: Type[YAMLModelFactory] = YAMLModelFactory
+    model_fabric.set_classes(models_classes)
     dialogs: list[Dialog] = []
 
     @property
@@ -37,7 +38,7 @@ class DialogYAMLBuilder:
     @classmethod
     def register_custom_model(cls, yaml_tag: str, custom_model: Type[YAMLModel]):
         logger.debug(f'Register tag {yaml_tag!r} for model {custom_model.__name__!r}')
-        cls.model_parser.add_model_class(yaml_tag, custom_model)
+        cls.model_fabric.add_model_class(yaml_tag, custom_model)
 
     @classmethod
     def build(cls, yaml_file_name: str, yaml_dir_path: str = None) -> list[Dialog]:
@@ -79,12 +80,12 @@ class DialogYAMLBuilder:
     @classmethod
     def _build_dialogs(cls, dialog_models: dict) -> list[Dialog]:
         logger.debug('Create dialogs')
-        dialogs = [dialog_model.get_obj() for dialog_model in dialog_models.values()]
+        dialogs = [dialog_model.to_object() for dialog_model in dialog_models.values()]
         return dialogs
 
     @classmethod
     def _build_widget(cls, widget_data: dict):
-        widget = cls.model_parser.from_data(widget_data)
+        widget = cls.model_fabric.create_model(widget_data)
         return widget
 
     @classmethod
@@ -98,7 +99,7 @@ class DialogYAMLBuilder:
         logger.debug(f'Build window data {state_name!r}')
         window_data['state'] = state_group_raw
         window_data['widgets'] = cls._build_widgets(window_data.get('widgets', []))
-        window_model = cls.model_parser.from_data(dict(window=window_data))
+        window_model = cls.model_fabric.create_model(dict(window=window_data))
         return window_model
 
     @classmethod

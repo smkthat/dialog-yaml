@@ -11,7 +11,7 @@ class CalendarModel(WidgetModel):
     id: str = None
     on_click: FuncField = None
 
-    def get_obj(self) -> Calendar:
+    def to_object(self) -> Calendar:
         kwargs = clean_empty(dict(
             id=self.id,
             on_click=self.on_click.func if self.on_click else None,

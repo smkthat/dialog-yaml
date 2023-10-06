@@ -5,7 +5,7 @@ from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annot
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Keyboard
-from pydantic import constr, model_validator, BeforeValidator, ConfigDict
+from pydantic import constr, model_validator, BeforeValidator, ConfigDict, BaseModel
 
 from core.decorators import singleton
 from core.exceptions import (
@@ -13,7 +13,6 @@ from core.exceptions import (
     InvalidFunctionType,
     CategoryNotFoundError, FunctionNotFoundError
 )
-from core.models import YAMLModel
 
 
 class CategoryName(Enum):
@@ -90,27 +89,27 @@ class Category:
 class FuncRegistry:
     """The FuncRegistry class manages the registration and retrieval of functions.
 
-    :ivar _categories_: A dictionary of categories
+    :ivar _categories_map_: A dictionary of categories
     :vartype _categories_: Dict[str, Category]
     """
-    _categories_: Dict[str, Category]
+    _categories_map_: Dict[str, Category]
 
     def __init__(self):
         self.clear_categories()
 
     def clear_categories(self):
-        self._categories_ = {
+        self._categories_map_ = {
             category_name.value: Category(category_name.value)
             for category_name in CategoryName
         }
 
     @property
     def func(self) -> Category:
-        return self._categories_[CategoryName.func.value]
+        return self._categories_map_[CategoryName.func.value]
 
     @property
     def notify(self) -> Category:
-        return self._categories_[CategoryName.notify.value]
+        return self._categories_map_[CategoryName.notify.value]
 
     def register(self, function: Union[Callable, Awaitable],
                  category_name: Union[str, CategoryName] = CategoryName.func) -> None:
@@ -138,7 +137,7 @@ class FuncRegistry:
         :rtype: Category
         """
 
-        category = self._categories_.get(name)
+        category = self._categories_map_.get(name)
 
         if category is not None:
             return category
@@ -177,7 +176,10 @@ function_registry = FuncRegistry()
 function_registry.notify.register(function=notify_func)
 
 
-class FuncModel(YAMLModel):
+class FuncModel(BaseModel):
+    def to_object(self) -> Union[Callable, Awaitable]:
+        return self.func
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     category_name: str = CategoryName.func.value
@@ -253,6 +255,17 @@ async def func_wrapper(
         *args,
         **kwargs
 ):
+    """Asynchronously executes pre_func and on_click_func if provided in kwargs.
+
+    :param args: The arguments.
+    :type args: Tuple
+    :param kwargs: The keyword arguments.
+    :type kwargs: Dict
+
+    :return: None
+    :rtype: None
+    """
+
     if pre_func := kwargs.get('pre_func'):
         pre_data = kwargs.get('pre_data')
         await pre_func(*args, pre_data)
@@ -274,6 +287,29 @@ async def on_click_wrapper(
         after_on_click_func: Union[Callable, Awaitable],
         after_on_click_data: Optional[Dict],
 ):
+    """Executes a series of functions before and after the main on_click function is called.
+
+    :param callback: The callback query.
+    :type callback: CallbackQuery
+    :param button: The button.
+    :type button: Keyboard
+    :param manager: The dialog manager.
+    :type manager: DialogManager
+    :param on_click_func: The on_click function.
+    :type on_click_func: Union[Callable, Awaitable]
+    :param pre_on_click_func: The pre_on_click function.
+    :type pre_on_click_func: Union[Callable, Awaitable]
+    :param pre_on_click_data: The pre_on_click data.
+    :type pre_on_click_data: Optional[Dict]
+    :param after_on_click_func: The after_on_click function.
+    :type after_on_click_func: Union[Callable, Awaitable]
+    :param after_on_click_data: The after_on_click data.
+    :type after_on_click_data: Optional[Dict]
+
+    :return: None
+    :rtype: None
+    """
+
     if pre_on_click_func:
         await pre_on_click_func(callback, pre_on_click_data)
 

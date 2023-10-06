@@ -131,7 +131,6 @@ class TestFuncRegistry:
         function = get_test_func
 
         # When
-        # registry.notify._functions = {}
         registry.register(function, CategoryName.notify)
         retrieved_function = registry.get_function(function.__name__, CategoryName.notify.value)
 

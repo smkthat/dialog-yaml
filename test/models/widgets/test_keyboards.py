@@ -3,12 +3,12 @@ from aiogram_dialog.widgets.kbd import (
     Url, Button, SwitchTo, Start, Next, Back, Cancel, Group, ScrollingGroup
 )
 
-from conftest import TestWidgetBase
 from core.models.widgets.kbd import (
     UrlButtonModel, CallbackButtonModel,
     SwitchToModel, StartModel, NextModel, BackModel, CancelModel,
     GroupKeyboardModel, RowKeyboardModel, ColumnKeyboardModel, ScrollingGroupKeyboardModel
 )
+from test.models.widgets.conftest import TestWidgetBase
 
 
 class TestKeyboard(TestWidgetBase):
@@ -21,10 +21,11 @@ class TestKeyboard(TestWidgetBase):
         ({'callback': {
             'id': 'callback',
             'text': 'Callback with funcs',
-            'on_click': {'name': 'get_data', 'data': {'key': 'value'}},
-            'pre_on_click': 'func_test',
-            'after_on_click': 'func_test',
+            'on_click': {'name': 'test_getter', 'data': {'key': 'value'}},
+            'pre_on_click': 'test_func',
+            'after_on_click': 'test_func',
             'notify': {
+                'func': 'test_notify',
                 'val': 'This is alert notify with 3 sec delay',
                 'show_alert': True,
                 'delay': 3
@@ -34,13 +35,13 @@ class TestKeyboard(TestWidgetBase):
         ({'switch_to': {
             'id': 'switch',
             'text': 'Switch to',
-            'state': 'TestSG:test1'
+            'state': 'group1:state1'
         }},
          SwitchToModel, SwitchTo),
         ({'start': {
             'id': 'start',
             'text': 'Start',
-            'state': 'TestSG:test1',
+            'state': 'group1:state1',
             'mode': 'NORMAL'
         }},
          StartModel, Start),
@@ -56,7 +57,7 @@ class TestKeyboard(TestWidgetBase):
                 {'start': {
                     'id': 'start',
                     'text': 'Start',
-                    'state': 'TestSG:test1'
+                    'state': 'group1:state1'
                 }},
                 {'next': {}},
                 {'back': {}},
@@ -69,7 +70,7 @@ class TestKeyboard(TestWidgetBase):
                 {'start': {
                     'id': 'start',
                     'text': 'Start',
-                    'state': 'TestSG:test1'
+                    'state': 'group1:state1'
                 }},
                 {'next': {}},
                 {'back': {}},
@@ -82,7 +83,7 @@ class TestKeyboard(TestWidgetBase):
                 {'start': {
                     'id': 'start',
                     'text': 'Start',
-                    'state': 'TestSG:test1'
+                    'state': 'group1:state1'
                 }},
                 {'next': {}},
                 {'back': {}},
@@ -99,7 +100,7 @@ class TestKeyboard(TestWidgetBase):
                 {'start': {
                     'id': 'start',
                     'text': 'Start',
-                    'state': 'TestSG:test1'
+                    'state': 'group1:state1'
                 }},
                 {'next': {}},
                 {'back': {}},
@@ -109,7 +110,7 @@ class TestKeyboard(TestWidgetBase):
          ScrollingGroupKeyboardModel, ScrollingGroup),
     ])
     def test_keyboard(self, input_data: dict, expected_model_cls, expected_widget_cls):
-        widget_model = self.model_parser_class.from_data(input_data)
+        widget_model = self.yaml_model.from_data(input_data)
         assert isinstance(widget_model, expected_model_cls)
 
         widget_obj = widget_model.get_obj()

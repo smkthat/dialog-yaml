@@ -138,7 +138,10 @@ class YAMLStatesBuilder:
         :rtype: Dict[str, State]
         """
 
-        return {state_name: State(state_name, group_name) for state_name in values}
+        return {
+            state_name: State(state_name, group_name)
+            for state_name in values
+        }
 
     @classmethod
     def _build_states_group(cls, group_name: str, states: Dict[str, State]) -> StatesGroup:
@@ -206,7 +209,10 @@ class YAMLStatesBuilder:
             states = self._build_states(raw_states, group_name)
             states_group = self._build_states_group(group_name, states)
             result[group_name] = states_group
-            result.update(**states)
+            result.update(**{
+                self.format_state_name(group_name, state_name): state
+                for state_name, state in states.items()
+            })
 
         return result
 
@@ -236,9 +242,11 @@ class YAMLStatesBuilder:
 
         :return: None
         :rtype: None
+
+        :raises StatesGroupNotFoundError: If the states group is not found.
         """
 
-        state_name = state.state
+        state_name = self.format_state_name(group_name, state._state)
         states_group = self._states_groups_map_.get(group_name, None)
 
         if not states_group:

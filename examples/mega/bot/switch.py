@@ -18,6 +18,6 @@ async def set_name(message: Message, message_input: MessageInput, manager: Dialo
     await manager.next()
 
 
-def register_switch(dialog_yaml):
-    dialog_yaml.func.register(data_getter)
-    dialog_yaml.func.register(set_name)
+def register_switch(registry):
+    registry.func.register(data_getter)
+    registry.func.register(set_name)

@@ -3,7 +3,7 @@ from typing import Union, Callable, Awaitable
 import pytest
 
 from core.exceptions import FunctionNotFoundError, DialogYamlException, CategoryNotFoundError
-from core.models.funcs.func import CategoryName, FuncModel, FuncRegistry
+from core.models.funcs.func import CategoryName, FuncModel, FuncsRegistry
 
 
 @pytest.fixture
@@ -16,8 +16,8 @@ def get_test_func() -> Union[Callable, Awaitable]:
 
 
 @pytest.fixture
-def registry(get_test_func) -> FuncRegistry:
-    registry = FuncRegistry()
+def registry(get_test_func) -> FuncsRegistry:
+    registry = FuncsRegistry()
     registry.func.register(get_test_func)
     return registry
 

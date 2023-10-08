@@ -1,4 +1,4 @@
-from typing import Generic, Union, Self
+from typing import Union, Self
 
 from aiogram_dialog.widgets.kbd import Calendar
 

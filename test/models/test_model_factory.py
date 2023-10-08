@@ -2,6 +2,7 @@ from typing import Self
 
 import pytest
 from aiogram_dialog.api.internal import Widget
+from pydantic import ValidationError
 
 from core.exceptions import ModelRegistrationError, InvalidTagName, DialogYamlException
 from core.models import YAMLModelFactory, YAMLModel
@@ -355,6 +356,29 @@ class TestFromDataModelClass(TestYAMLModelClass):
         assert isinstance(result, YAMLSubModel)
         assert result.key1 == 'value1'
         assert result.key2 == 'value2'
+
+    def test_raise_exception_when_model_is_invalid(self):
+        # Given
+        data = {'test': {
+            'key1': 123,
+            'key2': [1, '2', .3]
+        }}
+
+        # When/Then
+        with pytest.raises(DialogYamlException):
+            YAMLModelFactory.create_model(data)
+
+    def test_raise_exception_when_not_correct_model_data(self):
+        # Given
+        model_class = YAMLSubModel
+        data = {
+            'key1': 123,
+            'key2': [1, '2', .3]
+        }
+
+        # When/Then
+        with pytest.raises(ValidationError):
+            model_class.to_model(data)
 
     def test_to_model_with_missing_key(self):
         # Given

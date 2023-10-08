@@ -2,7 +2,7 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import ManagedCounter
 
-from core import FuncRegistry
+from core import FuncsRegistry
 
 
 async def counter_getter(dialog_manager: DialogManager, **kwargs):
@@ -19,6 +19,6 @@ async def on_text_click(
     await event.answer(f"Value: {widget.get_value()}")
 
 
-def register_counters(dialog_yaml: FuncRegistry):
-    dialog_yaml.func.register(counter_getter)
-    dialog_yaml.func.register(on_text_click)
+def register_counters(registry: FuncsRegistry):
+    registry.func.register(counter_getter)
+    registry.func.register(on_text_click)

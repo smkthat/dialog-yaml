@@ -7,7 +7,7 @@ from pydantic import field_validator
 from core.models.base import YAMLModel, WidgetModel
 from core.models.funcs import FuncField
 from core.models.widgets.kbd import GroupKeyboardField
-from core.states import YAMLStatesBuilder
+from core.states import YAMLStatesManager
 from core.utils import clean_empty
 
 
@@ -22,7 +22,7 @@ class WindowModel(YAMLModel):
 
     def to_object(self) -> Window:
         kwargs = clean_empty(dict(
-            state=YAMLStatesBuilder().get_by_name(self.state),
+            state=YAMLStatesManager().get_by_name(self.state),
             getter=self.getter.func if self.getter else None,
             parse_mode=self.parse_mode,
             disable_web_page_preview=self.disable_web_page_preview,

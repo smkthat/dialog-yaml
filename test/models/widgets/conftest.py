@@ -4,8 +4,8 @@ import pytest
 
 from core import models_classes
 from core.models import YAMLModelFactory
-from core.models.funcs import FuncRegistry
-from core.states import YAMLStatesBuilder
+from core.models.funcs import FuncsRegistry
+from core.states import YAMLStatesManager
 
 
 @pytest.fixture
@@ -38,8 +38,8 @@ def get_test_getter():
 
 
 @pytest.fixture
-def func_registry(get_test_func, get_test_notify, get_test_getter) -> FuncRegistry:
-    registry = FuncRegistry()
+def func_registry(get_test_func, get_test_notify, get_test_getter) -> FuncsRegistry:
+    registry = FuncsRegistry()
     registry.clear_categories()
     registry.func.register(get_test_func)
     registry.func.register(get_test_getter)
@@ -49,7 +49,7 @@ def func_registry(get_test_func, get_test_notify, get_test_getter) -> FuncRegist
 
 @pytest.fixture
 def states_builder():
-    states_builder = YAMLStatesBuilder()
+    states_builder = YAMLStatesManager()
     states = states_builder.parse_raw_states_from_list({
         'group1:state1',
         'group1:state2',

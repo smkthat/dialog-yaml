@@ -86,8 +86,8 @@ class Category:
 
 
 @singleton
-class FuncRegistry:
-    """The FuncRegistry class manages the registration and retrieval of functions.
+class FuncsRegistry:
+    """The FuncsRegistry class manages the registration and retrieval of functions.
 
     :ivar _categories_map_: A dictionary of categories
     :vartype _categories_: Dict[str, Category]
@@ -172,7 +172,7 @@ async def notify_func(callback: CallbackQuery, data: Dict = None, *args, **kwarg
     )
 
 
-function_registry = FuncRegistry()
+function_registry = FuncsRegistry()
 function_registry.notify.register(function=notify_func)
 
 

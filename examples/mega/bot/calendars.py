@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import ManagedCalendar
 
-from core import FuncRegistry
+from core import FuncsRegistry
 
 
 async def on_date_selected(
@@ -16,5 +16,5 @@ async def on_date_selected(
     await callback.answer(str(selected_date))
 
 
-def register_calendars(dialog_yaml: FuncRegistry):
-    dialog_yaml.func.register(on_date_selected)
+def register_calendars(registry: FuncsRegistry):
+    registry.func.register(on_date_selected)

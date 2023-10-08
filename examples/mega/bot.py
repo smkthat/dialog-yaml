@@ -6,15 +6,15 @@ import dotenv
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter
+from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import Message, ErrorEvent
 
-from aiogram_dialog import DialogManager, StartMode, ShowMode, setup_dialogs
+from aiogram_dialog import DialogManager, StartMode, ShowMode
 from aiogram_dialog.api.exceptions import UnknownIntent
 
-from core import DialogYAMLBuilder
-from core.middleware import DialogYAMLMiddleware
-from examples.mega.bot import register
+from core import DialogYAMLBuilder, FuncsRegistry
+from examples.mega.bot import register_dialog_yaml_funcs
 from examples.mega.bot.custom import CustomCalendarModel
 
 
@@ -23,7 +23,7 @@ async def start(message: Message, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
     await dialog_manager.start(
-        state=dialog_yaml.states_holder.get_by_name('Menu:MAIN'),
+        state=dialog_yaml.states_manager.get_by_name('Menu:MAIN'),
         mode=StartMode.RESET_STACK
     )
 
@@ -46,36 +46,40 @@ async def on_unknown_intent(event: ErrorEvent, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
     await dialog_manager.start(
-        state=dialog_yaml.states_holder.get_by_name('Menu:MAIN'),
+        state=dialog_yaml.states_manager.get_by_name('Menu:MAIN'),
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.SEND,
     )
+
+
+class CustomSG(StatesGroup):
+    state1 = State()
+    state2 = State()
+    state3 = State()
 
 
 async def main():
     dotenv.load_dotenv()
     logging.basicConfig(level=logging.DEBUG)
 
-    dy_router = Router()
-    dy_builder = DialogYAMLBuilder()
-    dy_builder.register_custom_model('my_calendar', CustomCalendarModel)
-    register(dy_builder)
-    dialogs = dy_builder.build('main.yaml', 'data')
-    dy_router.include_routers(*dialogs)
-    dy_router.message.middleware.register(DialogYAMLMiddleware(dialog_yaml=dy_builder))
-    dy_router.callback_query.middleware.register(DialogYAMLMiddleware(dialog_yaml=dy_builder))
-    dy_router.errors.middleware.register(DialogYAMLMiddleware(dialog_yaml=dy_builder))
-    setup_dialogs(dy_router)
+    register_dialog_yaml_funcs(FuncsRegistry())
+    dy_builder = DialogYAMLBuilder.build(
+        yaml_file_name='main.yaml',
+        yaml_dir_path='data',
+        models={'my_calendar': CustomCalendarModel},
+        states=[CustomSG],
+        router=Router(),
+    )
 
-    dy_router.message.register(start, F.text == "/start")
-    dy_router.errors.register(
+    dy_builder.router.message.register(start, F.text == "/start")
+    dy_builder.router.errors.register(
         on_unknown_intent,
         ExceptionTypeFilter(UnknownIntent),
     )
 
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
-    dp.include_router(dy_router)
+    dp.include_router(dy_builder.router)
     bot = Bot(token=dotenv.dotenv_values().get('MEGA_BOT_TOKEN'))
     await bot.get_updates(offset=-1)
     await dp.start_polling(bot)

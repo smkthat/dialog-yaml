@@ -4,7 +4,7 @@ from typing import Any
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 
-from core import FuncRegistry
+from core import FuncsRegistry
 
 
 @dataclass
@@ -37,7 +37,7 @@ async def on_item_selected(
     await callback.answer(f'item id: {selected_item}')
 
 
-def register_selects(dialog_yaml: FuncRegistry):
-    dialog_yaml.func.register(getter)
-    dialog_yaml.func.register(fruit_id_getter)
-    dialog_yaml.func.register(on_item_selected)
+def register_selects(registry: FuncsRegistry):
+    registry.func.register(getter)
+    registry.func.register(fruit_id_getter)
+    registry.func.register(on_item_selected)

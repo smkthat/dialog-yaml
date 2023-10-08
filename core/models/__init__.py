@@ -100,25 +100,29 @@ class YAMLModelFactory:
         :return: True if the tag is valid, False otherwise.
         :rtype: bool
         """
+
         cls.is_valid_tag(tag)
         cls.is_valid_model_class(tag, model_class)
         return True
 
     @classmethod
-    def add_model_class(cls, tag: str, model_class: Type[YAMLModel]):
+    def add_model_class(cls, tag: str, model_class: Type[YAMLModel], replace_existing: bool = False):
         """Registers a custom model class with a unique tag.
 
         :param tag: A unique tag for the custom model class.
         :type tag: Str
         :param model_class: The custom model class to be registered.
         :type model_class: Type[YAMLModel]
+        :param replace_existing: Whether to replace an existing model class with the same tag.
+        :type replace_existing: bool
 
         :raises ModelRegistrationError: When a model with the same tag has already been registered.
         """
 
         if cls._is_valid(tag, model_class):
+            registered_model_class = cls.get_model_class(tag)
 
-            if registered_model_class := cls.get_model_class(tag):
+            if registered_model_class and not replace_existing:
                 raise ModelRegistrationError(
                     tag, registered_model_class,
                     message='{tag!r} already registered with {model_class!r}'
@@ -136,6 +140,7 @@ class YAMLModelFactory:
         :return: The custom model class associated with the given tag or None if not found.
         :rtype: Type[YAMLModel] or None
         """
+
         logger.debug(f'Get class for tag {tag!r}')
         return cls._models_classes.get(tag)
 
@@ -148,6 +153,7 @@ class YAMLModelFactory:
 
         :raises DialogYamlException: When `models_classes` is not a valid dictionary of model classes.
         """
+
         if not isinstance(models_classes, dict):
             raise DialogYamlException("models_classes must be a dictionary of strings to YAMLModel classes")
 
@@ -170,18 +176,20 @@ class YAMLModelFactory:
         :raises DialogYamlException: When `yaml_data` is `None` or an empty dictionary.
         :raises InvalidTagName: When a tag key does not exist in the `YAMLModelFabric._models_classes`.
         """
+
         if not yaml_data or not isinstance(yaml_data, dict):
             raise DialogYamlException("yaml_data must be a non-empty dictionary")
 
         tag = next(iter(yaml_data))  # getting first key
         cls.is_valid_tag(tag)
         model_class = cls.get_model_class(tag)
+
         data = yaml_data[tag]
         logger.debug(f'Parse tag {tag!r}: {data}')
+
         try:
             model = model_class.to_model(data)
         except ValidationError as e:
-            raise DialogYamlException(
-                f'Failed to parse tag {tag!r}: {e}'
-            )
+            raise DialogYamlException(f'Failed to parse tag {tag!r}: {e}')
+
         return model

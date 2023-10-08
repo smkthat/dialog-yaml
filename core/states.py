@@ -11,20 +11,20 @@ Futures:
 
 Classes:
 ---------
-- YAMLStatesBuilder: A singleton class responsible for managing and storing states and state groups.
+- YAMLStatesManager: A singleton class responsible for managing and storing states and state groups.
 """
 
 from collections import defaultdict
-from typing import List, Dict, Union, Iterable, Any, Set
+from typing import List, Dict, Union, Iterable, Set, Type
 
 from aiogram.fsm.state import State, StatesGroup
 
 from core.decorators import singleton
-from core.exceptions import DialogYamlException, InvalidTagName, InvalidTagDataType, StatesGroupNotFoundError
+from core.exceptions import DialogYamlException, StatesGroupNotFoundError
 
 
 @singleton
-class YAMLStatesBuilder:
+class YAMLStatesManager:
     """A singleton class responsible for managing and storing states and state groups used in a dialog FSM system.
 
     - Manages and stores states and state groups used in a dialog system
@@ -72,60 +72,41 @@ class YAMLStatesBuilder:
         result = self._states_groups_map_.get(name)
         return result
 
-    def load_states_from_yaml_data(self, input_data: Dict) -> None:
-        """Loads states from data.
+    def build_states_from_yaml_data(self, input_data: Dict) -> None:
+        """Builds the state object from YAML data and extends to `_states_groups_map_`.
 
         Example valid data:
-            {'dialogs': {'group1': {'windows': {'state1': {}, 'state2': {}}}}}
+            {'dialogs': {'group1': {'windows': {'state1': {}, 'state2': {}, ...}}, ...}}
 
-        This will load group1 states group and his state1 and state2 states.
-        Tags "dialogs" and "windows" are !required.
+        When:
+            - "group1" is `StatesGroup` name
+            - "state1" and "state2" are `State` names
+            - ... are other `StatesGroup` and `State`
+
+        Explained:
+            This will build and extend group1 states group and his state1 and state2 states.
+            Keys "dialogs" and "windows" are !required in input_data
 
         :param input_data: The data to load states from
         :type input_data: Dict
-        
+
         :return: None
         :rtype: None
+
+        :raises DialogYamlException: When the input data is invalid
         """
 
-        dialogs_data = self._check_and_get_tag_data('dialogs', input_data)
+        try:
+            for group_name, group_data in input_data['dialogs'].items():
+                states = self._build_states(group_data['windows'].keys(), group_name)
+                states_group = self._build_states_group(group_name, states)
 
-        for group_name, group_data in dialogs_data.items():
-            windows_data = self._check_and_get_tag_data('windows', group_data)
-            states = self._build_states(tuple(windows_data.keys()), group_name)
-            states_group = self._build_states_group(group_name, states)
+                self.add_states_group_to_map(group_name, states_group)
+                self.add_states_to_map(group_name, states)
 
-            self.add_states_group_to_map(group_name, states_group)
-            self.add_states_to_map(group_name, states)
-
-    def _check_and_get_tag_data(self, tag: str, data: Dict[str, Any]) -> Dict:
-        """Checks and gets the data for the given tag.
-
-        :param tag: The tag to check.
-        :type tag: str
-        :param data: The data to check.
-        :type data: Dict
-
-        :return: The data for the given tag.
-        :rtype: Dict
-
-        :raises InvalidTagName: If the tag does not exist.
-        :raises InvalidTagDataType: If the tag is not a non-empty Dict.
-        :raises DialogYamlException: If the data is None or data type is invalid.
-        """
-
-        if not isinstance(data, Dict):
-            raise DialogYamlException(f'Invalid data type. Expected Dict, got {type(data)}')
-
-        result_data = data.get(tag, None)
-
-        if not result_data:
-            raise InvalidTagName(tag, 'Tag {tag} does not found in data.')
-
-        if not isinstance(result_data, Dict):
-            raise InvalidTagDataType(tag, 'Data from {tag} must be a non-empty Dict.' + f' Found {type(result_data)}.')
-
-        return result_data
+        except (TypeError, KeyError, AttributeError) as e:
+            raise DialogYamlException(f'Invalid data. Use the "DialogYAMLBuilder.check_yaml_data_base_structure" '
+                                      f'function before using this method. Error: {e}')
 
     @classmethod
     def _build_states(cls, values: Iterable[str], group_name: str = None) -> Dict[str, State]:
@@ -138,10 +119,7 @@ class YAMLStatesBuilder:
         :rtype: Dict[str, State]
         """
 
-        return {
-            state_name: State(state_name, group_name)
-            for state_name in values
-        }
+        return {state_name: State(state_name, group_name) for state_name in values}
 
     @classmethod
     def _build_states_group(cls, group_name: str, states: Dict[str, State]) -> StatesGroup:
@@ -298,3 +276,31 @@ class YAMLStatesBuilder:
         """
 
         return f'{group_name}{cls.DELIMITER}{state_name}'
+
+    def include_states_group_by_class(self, custom_state_class: Type[StatesGroup]) -> None:
+        """It creates an instance of the custom `StatesGroup` class,
+        extracts the states from the instance, and adds them to the _states_groups_map_.
+
+        :param custom_state_class: The custom `StatesGroup` class
+        :type custom_state_class: Type[StatesGroup]
+
+        :return: None
+        :rtype: None
+
+        :raises DialogYamlException: If the custom `StatesGroup` class is not a subclass of `StatesGroup`.
+        """
+
+        group_name = custom_state_class.__name__
+
+        if not issubclass(custom_state_class, StatesGroup):
+            raise DialogYamlException(f"{group_name!r} must be a subclass of StatesGroup")
+
+        states_group = custom_state_class()
+        self.add_states_group_to_map(group_name, states_group)
+
+        if states_group.__states__:
+            states = {self.format_state_name(group_name, state._state): state for state in states_group.__states__}
+            self.add_states_to_map(group_name, states)
+        else:
+            raise DialogYamlException(f"{group_name!r} must have at least one state.")
+

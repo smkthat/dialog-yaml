@@ -2,7 +2,7 @@ import calendar
 
 from aiogram_dialog import DialogManager
 
-from core import FuncRegistry
+from core import FuncsRegistry
 
 
 async def product_getter(**_kwargs):
@@ -20,6 +20,6 @@ async def paging_getter(dialog_manager: DialogManager, **_kwargs):
     }
 
 
-def register_scrolls(dialog_yaml: FuncRegistry):
-    dialog_yaml.func.register(product_getter)
-    dialog_yaml.func.register(paging_getter)
+def register_scrolls(registry: FuncsRegistry):
+    registry.func.register(product_getter)
+    registry.func.register(paging_getter)

@@ -4,7 +4,7 @@ from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annot
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
-from aiogram_dialog.widgets.kbd import Keyboard
+from aiogram_dialog.widgets.kbd import Keyboard, Button
 from pydantic import constr, model_validator, BeforeValidator, ConfigDict, BaseModel
 
 from core.decorators import singleton
@@ -13,6 +13,7 @@ from core.exceptions import (
     InvalidFunctionType,
     CategoryNotFoundError, FunctionNotFoundError
 )
+from core.utils import clean_empty
 
 
 class CategoryName(Enum):
@@ -163,12 +164,16 @@ class FuncsRegistry:
         return function
 
 
-async def notify_func(callback: CallbackQuery, data: Dict = None, *args, **kwargs) -> None:
-    if data:
-        if delay := data.get('delay'):
-            await asyncio.sleep(delay=delay)
+async def notify_func(
+        callback: CallbackQuery,
+        button: Button,
+        dialog_manager: DialogManager,
+        data: Dict,
+) -> None:
+    if delay := data.get('delay'):
+        await asyncio.sleep(delay=delay)
     await callback.answer(
-        **data
+        **data,
     )
 
 
@@ -180,16 +185,22 @@ class FuncModel(BaseModel):
     def to_object(self) -> Union[Callable, Awaitable]:
         return self.func
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra='allow')
 
     category_name: str = CategoryName.func.value
     name: str
-    data: Optional[Dict[Any, Any]] = {}
+
+    @property
+    def data(self) -> Dict:
+        return clean_empty(dict(extra_data=self.model_extra))
 
     @property
     def func(self):
         f = function_registry.get_function(self.name, self.category_name)
         return f
+
+    async def run_async(self, *args, **kwargs):
+        asyncio.create_task(self.func(*args, **kwargs))
 
     @model_validator(mode='after')
     def check_func(self) -> Self:
@@ -223,12 +234,13 @@ class NotifyModel(FuncModel):
     delay: Union[int, None] = None
 
     @property
-    def notify_data(self) -> Dict:
-        return dict(
+    def data(self) -> Dict:
+        return clean_empty(dict(
             text=self.text,
             show_alert=self.show_alert,
-            delay=self.delay
-        )
+            delay=self.delay,
+            extra_data=self.model_extra
+        ))
 
     @classmethod
     def to_model(cls, data: Union[str, dict, Self]) -> Self:
@@ -249,71 +261,3 @@ class NotifyModel(FuncModel):
 
 
 NotifyField = Annotated[NotifyModel, BeforeValidator(NotifyModel.to_model)]
-
-
-async def func_wrapper(
-        *args,
-        **kwargs
-):
-    """Asynchronously executes pre_func and on_click_func if provided in kwargs.
-
-    :param args: The arguments.
-    :type args: Tuple
-    :param kwargs: The keyword arguments.
-    :type kwargs: Dict
-
-    :return: None
-    :rtype: None
-    """
-
-    if pre_func := kwargs.get('pre_func'):
-        pre_data = kwargs.get('pre_data')
-        await pre_func(*args, pre_data)
-
-    if on_click_func := kwargs.get('on_click_func'):
-        on_click_data = kwargs.get('on_click_data')
-        await on_click_func(*args, on_click_data)
-
-    pass
-
-
-async def on_click_wrapper(
-        callback: CallbackQuery,
-        button: Keyboard,
-        manager: DialogManager,
-        on_click_func: Union[Callable, Awaitable],
-        pre_on_click_func: Union[Callable, Awaitable],
-        pre_on_click_data: Optional[Dict],
-        after_on_click_func: Union[Callable, Awaitable],
-        after_on_click_data: Optional[Dict],
-):
-    """Executes a series of functions before and after the main on_click function is called.
-
-    :param callback: The callback query.
-    :type callback: CallbackQuery
-    :param button: The button.
-    :type button: Keyboard
-    :param manager: The dialog manager.
-    :type manager: DialogManager
-    :param on_click_func: The on_click function.
-    :type on_click_func: Union[Callable, Awaitable]
-    :param pre_on_click_func: The pre_on_click function.
-    :type pre_on_click_func: Union[Callable, Awaitable]
-    :param pre_on_click_data: The pre_on_click data.
-    :type pre_on_click_data: Optional[Dict]
-    :param after_on_click_func: The after_on_click function.
-    :type after_on_click_func: Union[Callable, Awaitable]
-    :param after_on_click_data: The after_on_click data.
-    :type after_on_click_data: Optional[Dict]
-
-    :return: None
-    :rtype: None
-    """
-
-    if pre_on_click_func:
-        await pre_on_click_func(callback, pre_on_click_data)
-
-    await on_click_func(callback, button, manager)
-
-    if after_on_click_func:
-        await after_on_click_func(callback, after_on_click_data)

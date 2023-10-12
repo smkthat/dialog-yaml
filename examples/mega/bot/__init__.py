@@ -6,6 +6,7 @@ from .counters import register_counters
 from .multiwidgets import register_multiwidgets
 from .switch import register_switch
 from .calendars import register_calendars
+from .callbacks import register_notifies
 
 
 def register_dialog_yaml_funcs(registry: FuncsRegistry):
@@ -16,3 +17,4 @@ def register_dialog_yaml_funcs(registry: FuncsRegistry):
     register_counters(registry)
     register_layouts(registry)
     register_calendars(registry)
+    register_notifies(registry)

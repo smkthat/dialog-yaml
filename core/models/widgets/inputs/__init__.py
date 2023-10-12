@@ -1,5 +1,3 @@
 from .input import MessageInputModel
 
-input_classes = dict(
-    input=MessageInputModel,
-)
+input_classes = {"input": MessageInputModel}

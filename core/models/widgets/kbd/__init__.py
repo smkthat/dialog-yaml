@@ -1,30 +1,16 @@
-from .keyboard import (
-    ButtonModel,
-    UrlButtonModel,
-    CallbackButtonModel,
-    SwitchToModel,
-    StartModel,
-    NextModel,
-    BackModel,
-    CancelModel,
-    GroupKeyboardModel,
-    RowKeyboardModel,
-    ColumnKeyboardModel,
-    ScrollingGroupKeyboardModel,
-    GroupKeyboardField,
-)
+from core.models.widgets.kbd import keyboard
 
-keyboard_classes = dict(
-    button=ButtonModel,
-    url=UrlButtonModel,
-    callback=CallbackButtonModel,
-    switch_to=SwitchToModel,
-    start=StartModel,
-    next=NextModel,
-    back=BackModel,
-    cancel=CancelModel,
-    group=GroupKeyboardModel,
-    row=RowKeyboardModel,
-    column=ColumnKeyboardModel,
-    scrolling_group=ScrollingGroupKeyboardModel,
-)
+keyboard_classes = {
+    "button": keyboard.ButtonModel,
+    "url": keyboard.UrlButtonModel,
+    "callback": keyboard.CallbackButtonModel,
+    "switch_to": keyboard.SwitchToModel,
+    "start": keyboard.StartModel,
+    "next": keyboard.NextModel,
+    "back": keyboard.BackModel,
+    "cancel": keyboard.CancelModel,
+    "group": keyboard.GroupKeyboardModel,
+    "row": keyboard.RowKeyboardModel,
+    "column": keyboard.ColumnKeyboardModel,
+    "scrolling_group": keyboard.ScrollingGroupKeyboardModel,
+}

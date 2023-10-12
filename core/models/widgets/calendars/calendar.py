@@ -3,7 +3,7 @@ from typing import Union, Self
 from aiogram_dialog.widgets.kbd import Calendar
 
 from core.models.base import WidgetModel
-from core.models.funcs import FuncField
+from core.models.funcs.func import FuncField
 from core.utils import clean_empty
 
 
@@ -13,11 +13,11 @@ class CalendarModel(WidgetModel):
 
     def to_object(self) -> Calendar:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                on_click=self.on_click.func if self.on_click else None,
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "on_click": self.on_click.func if self.on_click else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return Calendar(**kwargs)
 

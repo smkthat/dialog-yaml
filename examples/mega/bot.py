@@ -18,8 +18,9 @@ from examples.mega.bot import register_dialog_yaml_funcs
 from examples.mega.bot.custom import CustomCalendarModel
 
 
-async def start(message: Message, dialog_manager: DialogManager):
-    # it is important to reset stack because the user wants to restart everything
+async def start(_: Message, dialog_manager: DialogManager):
+    # it is important to reset stack because
+    # the user wants to restart everything
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data["dialog_yaml"]
     await dialog_manager.start(

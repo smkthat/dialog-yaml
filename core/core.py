@@ -7,22 +7,26 @@ from aiogram.fsm.state import StatesGroup
 from aiogram_dialog import Dialog, setup_dialogs
 from pydantic import BaseModel
 
+from core.models.funcs.func import FuncsRegistry
 from .exceptions import DialogYamlException, InvalidTagName, InvalidTagDataType
 from .middleware import DialogYAMLMiddleware
-from .reader import YAMLReader
-from .states import YAMLStatesManager
 from .models import YAMLModelFactory
 from .models.base import YAMLModel
-from .models.window import WindowModel
 from .models.dialog import DialogModel
+from .models.funcs import func_classes
 from .models.widgets import widget_classes
-from .models.funcs import FuncsRegistry, func_classes
+from .models.window import WindowModel
+from .reader import YAMLReader
+from .states import YAMLStatesManager
 
 logger = logging.getLogger(__name__)
 
-models_classes = dict(
-    window=WindowModel, dialog=DialogModel, **func_classes, **widget_classes
-)
+models_classes = {
+    "window": WindowModel,
+    "dialog": DialogModel,
+    **func_classes,
+    **widget_classes,
+}
 
 
 class DialogYAMLBuilder:
@@ -32,7 +36,10 @@ class DialogYAMLBuilder:
     _dialogs: List[Dialog] = []
 
     def __init__(
-        self, yaml_file_name: str, yaml_dir_path: str = None, router: Router = Router()
+        self,
+        yaml_file_name: str,
+        yaml_dir_path: str = None,
+        router: Router = Router(),
     ):
         logger.debug("Initialize DialogYAMLBuilder")
 
@@ -58,11 +65,13 @@ class DialogYAMLBuilder:
         models: Dict[str, Type[YAMLModel]] = None,
         router: Router = Router(),
     ) -> Self:
-        """Builds the DialogYAMLBuilder and initializes the aiogram dialogs router.
+        """Builds the DialogYAMLBuilder and initializes
+        the aiogram dialogs router.
 
         :param yaml_file_name: The name of the YAML file.
         :type yaml_file_name: str
-        :param yaml_dir_path: The path to the directory containing the YAML file.
+        :param yaml_dir_path: The path to the directory containing
+            the YAML file.
         :type yaml_dir_path: str (optional, default: None)
         :param states: The states to be included in the router.
         :type states: List[Type[StatesGroup]] (optional, default: None)
@@ -76,7 +85,10 @@ class DialogYAMLBuilder:
         """
 
         logger.debug(
-            f"Build {yaml_file_name!r} with states {states!r} and models {models!r}"
+            "Build %r with states %r and models %r",
+            yaml_file_name,
+            states,
+            models,
         )
         dialog_builder = DialogYAMLBuilder(yaml_file_name, yaml_dir_path)
         dialog_builder.register_custom_models(models)
@@ -101,7 +113,9 @@ class DialogYAMLBuilder:
         return dialog_builder
 
     def register_custom_models(
-        self, custom_models: Dict[str, Type[YAMLModel]], replace_existing: bool = False
+        self,
+        custom_models: Dict[str, Type[YAMLModel]],
+        replace_existing: bool = False,
     ) -> None:
         """Registers custom models.
 
@@ -119,11 +133,15 @@ class DialogYAMLBuilder:
 
         for yaml_tag, custom_model in custom_models.items():
             logger.debug(
-                f"Register tag {yaml_tag!r} for model {custom_model.__name__!r}"
+                "Register tag %r for model %r", yaml_tag, custom_model.__name__
             )
-            self.model_factory.add_model_class(yaml_tag, custom_model, replace_existing)
+            self.model_factory.add_model_class(
+                yaml_tag, custom_model, replace_existing
+            )
 
-    def register_custom_states(self, custom_states: List[Type[StatesGroup]]) -> None:
+    def register_custom_states(
+        self, custom_states: List[Type[StatesGroup]]
+    ) -> None:
         """Registers custom states.
 
         :param custom_states: The custom states.
@@ -167,7 +185,7 @@ class DialogYAMLBuilder:
 
         dialog_models = {}
         for group_name, dialog_model_data in data["dialogs"].items():
-            logger.debug(f"Build dialog data {group_name!r}")
+            logger.debug("Build dialog data %r", group_name)
             dialog_model_data["windows"] = self._build_windows(
                 group_name, dialog_model_data["windows"]
             )
@@ -180,7 +198,9 @@ class DialogYAMLBuilder:
 
     def _build_dialogs(self, dialog_models: Dict) -> List[Dialog]:
         logger.debug("Create dialogs")
-        dialogs = [dialog_model.to_object() for dialog_model in dialog_models.values()]
+        dialogs = [
+            dialog_model.to_object() for dialog_model in dialog_models.values()
+        ]
 
         return dialogs
 
@@ -195,7 +215,7 @@ class DialogYAMLBuilder:
     def _build_window(
         self, group_name: str, state_name: str, window_data: Dict
     ) -> BaseModel:
-        logger.debug(f"Build window data {state_name!r}")
+        logger.debug("Build window data %r", state_name)
         window_data["state"] = self.states_manager.format_state_name(
             group_name, state_name
         )
@@ -205,14 +225,18 @@ class DialogYAMLBuilder:
         return window_model
 
     def _build_widgets(self, widgets_data: List[dict]):
-        return [self._build_widget(widget_data) for widget_data in widgets_data]
+        return [
+            self._build_widget(widget_data) for widget_data in widgets_data
+        ]
 
     def _build_widget(self, widget_data: Dict):
         widget = self.model_factory.create_model(widget_data)
         return widget
 
     @classmethod
-    def check_yaml_data_base_structure(cls, input_data: Dict[str, Dict]) -> bool:
+    def check_yaml_data_base_structure(
+        cls, input_data: Dict[str, Dict]
+    ) -> bool:
         """Check provided input data for valid dialog-yaml structure.
 
         Tags "dialogs", "windows", "widgets" are !required.
@@ -253,12 +277,16 @@ class DialogYAMLBuilder:
                     windows_data = dialog_data["windows"]
 
                     for state_name, window_data in windows_data.items():
-                        cls.check_tag_data("widgets", window_data, data_type=List)
+                        cls.check_tag_data(
+                            "widgets", window_data, data_type=List
+                        )
 
         return True
 
     @classmethod
-    def check_tag_data(cls, tag: str, data: Dict[str, Any], data_type: Any) -> Any:
+    def check_tag_data(
+        cls, tag: str, data: Dict[str, Any], data_type: Any
+    ) -> Any:
         """Checks and gets the data for the given tag.
 
         :param tag: The tag to check
@@ -273,7 +301,8 @@ class DialogYAMLBuilder:
 
         :raises DialogYamlException: When the input data type is invalid
         :raises InvalidTagName: When the tag is not found in the data
-        :raises InvalidTagDataType: When the data type is not valid for the given tag
+        :raises InvalidTagDataType: When the data type is not valid
+            for the given tag
         """
 
         if not isinstance(data, Dict):

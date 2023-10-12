@@ -16,10 +16,16 @@ from aiogram_dialog.widgets.kbd import (
 )
 from pydantic import field_validator, BeforeValidator
 
+from core.exceptions import StateNotFoundError
 from core.models import YAMLModelFactory
 from core.models.base import WidgetModel
-from core.models.funcs import FuncField, NotifyField, FuncModel, function_registry
-from core.models.widgets.texts import TextField
+from core.models.funcs.func import (
+    FuncField,
+    NotifyField,
+    FuncModel,
+    function_registry,
+)
+from core.models.widgets.texts.text import TextField
 from core.states import YAMLStatesManager
 from core.utils import clean_empty
 
@@ -44,11 +50,11 @@ class UrlButtonModel(ButtonModel):
 
     def to_object(self) -> Url:
         kwargs = clean_empty(
-            dict(
-                text=self.text.to_object() if self.text else None,
-                url=self.uri.to_object() if self.uri else None,
-                when=self.when.func if self.when else None,
-            )
+            {
+                "text": self.text.to_object() if self.text else None,
+                "url": self.uri.to_object() if self.uri else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return Url(**kwargs)
 
@@ -66,16 +72,20 @@ class CallbackButtonModel(ButtonModel):
     notify: NotifyField = None
 
     def _get_partial_on_click(self) -> Callable:
-        """Returns a partial function that can be used as a callback for a button click event.
+        """Returns a partial function that can be used
+        as a callback for a button click event.
 
-        The returned partial function captures the values of `on_click` and `notify` from the `self` object.
+        The returned partial function captures the values
+        of `on_click` and `notify` from the `self` object.
 
         :return: partial function that can be used as a callback
         :rtype: Callable
         """
 
         partial_on_click = None
-        partial_data = clean_empty(dict(on_click=self.on_click, notify=self.notify))
+        partial_data = clean_empty(
+            {"on_click": self.on_click, "notify": self.notify}
+        )
 
         async def wrap_functions(*args, **kwargs) -> None:
             """Function that wraps the `on_click` and `notify` functions.
@@ -89,7 +99,10 @@ class CallbackButtonModel(ButtonModel):
             callback = None
 
             if notify := self.notify:
-                callback = (notify.func, {"data": {**notify.data, **self.model_extra}})
+                callback = (
+                    notify.func,
+                    {"data": {**notify.data, **self.model_extra}},
+                )
 
             if on_click := self.on_click:
                 if callback:
@@ -103,18 +116,20 @@ class CallbackButtonModel(ButtonModel):
                 await callback[0](*args, **callback[1])
 
         if partial_data:
-            partial_on_click = functools.partial(wrap_functions, **partial_data)
+            partial_on_click = functools.partial(
+                wrap_functions, **partial_data
+            )
 
         return partial_on_click
 
     def to_object(self) -> Button:
         kwargs = clean_empty(
-            dict(
-                text=self.text.to_object() if self.text else None,
-                id=self.id,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-            )
+            {
+                "text": self.text.to_object() if self.text else None,
+                "id": self.id,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+            }
         )
         return Button(**kwargs)
 
@@ -125,13 +140,13 @@ class SwitchToModel(CallbackButtonModel):
 
     def to_object(self) -> SwitchTo:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                text=self.text.to_object() if self.text else None,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-                state=self.state,
-            )
+            {
+                "id": self.id,
+                "text": self.text.to_object() if self.text else None,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+                "state": self.state,
+            }
         )
         return SwitchTo(**kwargs)
 
@@ -145,7 +160,7 @@ class SwitchToModel(CallbackButtonModel):
     def validate_state(cls, value) -> State:
         state = YAMLStatesManager().get_by_name(value)
         if not state:
-            raise ValueError(f'State "{value}" is declared but not provided.')
+            raise StateNotFoundError(value)
         return state
 
 
@@ -157,15 +172,15 @@ class StartModel(CallbackButtonModel):
 
     def to_object(self) -> Start:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                text=self.text.to_object() if self.text else None,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-                state=self.state,
-                data=self.data,
-                mode=self.mode,
-            )
+            {
+                "id": self.id,
+                "text": self.text.to_object() if self.text else None,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+                "state": self.state,
+                "data": self.data,
+                "mode": self.mode,
+            }
         )
         return Start(**kwargs)
 
@@ -191,12 +206,12 @@ class NextModel(CallbackButtonModel):
 
     def to_object(self) -> Next:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                text=self.text.to_object() if self.text else None,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "text": self.text.to_object() if self.text else None,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+            }
         )
         return Next(**kwargs)
 
@@ -206,12 +221,12 @@ class BackModel(CallbackButtonModel):
 
     def to_object(self) -> Back:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                text=self.text.to_object() if self.text else None,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "text": self.text.to_object() if self.text else None,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+            }
         )
         return Back(**kwargs)
 
@@ -225,13 +240,13 @@ class CancelModel(CallbackButtonModel):
         if isinstance(result, FuncModel):
             result = result.func
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                text=self.text.to_object() if self.text else None,
-                on_click=self._get_partial_on_click(),
-                when=self.when.func if self.when else None,
-                result=result,
-            )
+            {
+                "id": self.id,
+                "text": self.text.to_object() if self.text else None,
+                "on_click": self._get_partial_on_click(),
+                "when": self.when.func if self.when else None,
+                "result": result,
+            }
         )
         return Cancel(**kwargs)
 
@@ -243,11 +258,15 @@ class GroupKeyboardModel(WidgetModel):
 
     def to_object(self) -> Group:
         kwargs = clean_empty(
-            dict(
-                id=self.id, width=self.width, when=self.when.func if self.when else None
-            )
+            {
+                "id": self.id,
+                "width": self.width,
+                "when": self.when.func if self.when else None,
+            }
         )
-        return Group(*[button.to_object() for button in self.buttons], **kwargs)
+        return Group(
+            *[button.to_object() for button in self.buttons], **kwargs
+        )
 
     @classmethod
     def to_model(cls, data: Union[str, dict, Self]) -> Self:
@@ -288,16 +307,16 @@ class ScrollingGroupKeyboardModel(GroupKeyboardModel):
 
     def to_object(self) -> ScrollingGroup:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                height=self.height,
-                width=self.width,
-                on_page_changed=self.on_page_changed.func
+            {
+                "id": self.id,
+                "height": self.height,
+                "width": self.width,
+                "on_page_changed": self.on_page_changed.func
                 if self.on_page_changed
                 else None,
-                hide_on_single_page=self.hide_on_single_page,
-                hide_pager=self.hide_pager,
-            )
+                "hide_on_single_page": self.hide_on_single_page,
+                "hide_pager": self.hide_pager,
+            }
         )
         return ScrollingGroup(
             *[button.to_object() for button in self.buttons], **kwargs

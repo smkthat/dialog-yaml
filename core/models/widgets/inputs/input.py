@@ -5,7 +5,7 @@ from aiogram_dialog.widgets.input import MessageInput
 from pydantic import field_validator
 
 from core.models.base import WidgetModel
-from core.models.funcs import FuncField
+from core.models.funcs.func import FuncField
 from core.utils import clean_empty
 
 
@@ -16,11 +16,11 @@ class MessageInputModel(WidgetModel):
 
     def to_object(self) -> MessageInput:
         kwargs = clean_empty(
-            dict(
-                func=self.func.func if self.func else None,
-                filter=self.filter.func if self.filter else None,
-                content_types=self.content_types,
-            )
+            {
+                "func": self.func.func if self.func else None,
+                "filter": self.filter.func if self.filter else None,
+                "content_types": self.content_types,
+            }
         )
         return MessageInput(**kwargs)
 

@@ -4,10 +4,9 @@ from aiogram_dialog.widgets.kbd import StubScroll, NumberedPager, SwitchPage
 from aiogram_dialog.widgets.kbd.pager import PageDirection
 from aiogram_dialog.widgets.text import ScrollingText
 
-from core.models.funcs import FuncField, FuncModel
-from core.models.widgets.texts import TextField
-
 from core.models.base import WidgetModel
+from core.models.funcs.func import FuncField, FuncModel
+from core.models.widgets.texts.text import TextField
 from core.utils import clean_empty
 
 DEFAULT_PAGER_ID = "__pager__"
@@ -18,7 +17,9 @@ DEFAULT_PREV_BUTTON_TEXT = TextField(val="<")
 DEFAULT_NEXT_BUTTON_TEXT = TextField(val=">")
 DEFAULT_CURRENT_BUTTON_TEXT = TextField(val="{current_page1}", formatted=True)
 DEFAULT_PAGE_TEXT = TextField(val="{target_page1}", formatted=True)
-DEFAULT_CURRENT_PAGE_TEXT = TextField(val="[ {current_page1} ]", formatted=True)
+DEFAULT_CURRENT_PAGE_TEXT = TextField(
+    val="[ {current_page1} ]", formatted=True
+)
 
 
 class ScrollingTextModel(WidgetModel):
@@ -29,15 +30,15 @@ class ScrollingTextModel(WidgetModel):
 
     def to_object(self) -> ScrollingText:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                page_size=self.page_size,
-                text=self.text.to_object(),
-                on_page_changed=self.on_page_changed.func
+            {
+                "id": self.id,
+                "page_size": self.page_size,
+                "text": self.text.to_object(),
+                "on_page_changed": self.on_page_changed.func
                 if self.on_page_changed
                 else None,
-                when=self.when.func if self.when else None,
-            )
+                "when": self.when.func if self.when else None,
+            }
         )
         return ScrollingText(**kwargs)
 
@@ -55,15 +56,15 @@ class StubScrollModel(WidgetModel):
 
     def to_object(self) -> StubScroll:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                pages=self.pages.func
+            {
+                "id": self.id,
+                "pages": self.pages.func
                 if isinstance(self.pages, FuncModel)
                 else self.pages,
-                on_page_changed=self.on_page_changed.func
+                "on_page_changed": self.on_page_changed.func
                 if self.on_page_changed
                 else None,
-            )
+            }
         )
         return StubScroll(**kwargs)
 
@@ -82,13 +83,13 @@ class NumberedPagerModel(WidgetModel):
 
     def to_object(self) -> NumberedPager:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                scroll=self.scroll,
-                page_text=self.page_text.to_object(),
-                current_page_text=self.current_page_text.to_object(),
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "scroll": self.scroll,
+                "page_text": self.page_text.to_object(),
+                "current_page_text": self.current_page_text.to_object(),
+                "when": self.when.func if self.when else None,
+            }
         )
         return NumberedPager(**kwargs)
 
@@ -109,13 +110,13 @@ class SwitchPageModel(WidgetModel):
 
     def to_object(self) -> SwitchPage:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                page=self.page,
-                scroll=self.scroll,
-                text=self.text.to_object() if self.text else None,
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "page": self.page,
+                "scroll": self.scroll,
+                "text": self.text.to_object() if self.text else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return SwitchPage(**kwargs)
 

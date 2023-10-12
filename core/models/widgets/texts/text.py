@@ -5,7 +5,7 @@ from pydantic import BeforeValidator
 
 from core.models import YAMLModelFactory
 from core.models.base import WidgetModel
-from core.models.funcs import FuncModel, FuncField
+from core.models.funcs.func import FuncModel, FuncField
 from core.utils import clean_empty
 
 
@@ -15,13 +15,13 @@ class TextModel(WidgetModel):
 
     def to_object(self) -> Union[Const, Format]:
         kwargs = clean_empty(
-            dict(when=self.when.func if self.when else None, text=self.val)
+            {"when": self.when.func if self.when else None, "text": self.val}
         )
 
         if self.formatted:
             return Format(**kwargs)
-        else:
-            return Const(**kwargs)
+
+        return Const(**kwargs)
 
     @classmethod
     def to_model(cls, data: Union[str, dict, Self]) -> Self:
@@ -45,7 +45,7 @@ class MultiTextModel(WidgetModel):
 
     def to_object(self) -> Multi:
         kwargs = clean_empty(
-            dict(when=self.when.func if self.when else None, sep=self.sep)
+            {"when": self.when.func if self.when else None, "sep": self.sep}
         )
         return Multi(*[text.to_object() for text in self.texts], **kwargs)
 
@@ -66,13 +66,16 @@ class CaseModel(WidgetModel):
 
     def to_object(self) -> Case:
         kwargs = clean_empty(
-            dict(
-                texts={item: value.to_object() for item, value in self.texts.items()},
-                selector=self.selector.func
+            {
+                "texts": {
+                    item: value.to_object()
+                    for item, value in self.texts.items()
+                },
+                "selector": self.selector.func
                 if isinstance(self.selector, FuncModel)
                 else self.selector,
-                when=self.when.func if self.when else None,
-            )
+                "when": self.when.func if self.when else None,
+            }
         )
         return Case(**kwargs)
 
@@ -82,7 +85,8 @@ class CaseModel(WidgetModel):
             return data
         if texts := data.get("texts"):
             data["texts"] = {
-                item: TextModel.to_model(text_data) for item, text_data in texts.items()
+                item: TextModel.to_model(text_data)
+                for item, text_data in texts.items()
             }
         if selector := data.get("selector"):
             if isinstance(selector, dict):
@@ -97,14 +101,14 @@ class ListModel(WidgetModel):
 
     def to_object(self) -> List:
         kwargs = clean_empty(
-            dict(
-                field=self.field.to_object(),
-                items=self.items.func
+            {
+                "field": self.field.to_object(),
+                "items": self.items.func
                 if isinstance(self.items, FuncModel)
                 else self.items,
-                sep=self.sep,
-                when=self.when.func if self.when else None,
-            )
+                "sep": self.sep,
+                "when": self.when.func if self.when else None,
+            }
         )
         return List(**kwargs)
 

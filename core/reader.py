@@ -10,7 +10,9 @@ class YAMLReader:
     """
 
     @classmethod
-    def read_data_to_dict(cls, data_file_path: str, data_dir_path: str = "") -> dict:
+    def read_data_to_dict(
+        cls, data_file_path: str, data_dir_path: str = ""
+    ) -> dict:
         """Reads data from a YAML file and returns it as a dictionary.
 
         :param data_file_path: Path to the YAML file.

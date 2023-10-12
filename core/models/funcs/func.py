@@ -1,11 +1,24 @@
 import asyncio
 from enum import Enum
-from typing import Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated
+from typing import (
+    Dict,
+    Union,
+    Callable,
+    Awaitable,
+    Self,
+    Annotated,
+)
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
-from aiogram_dialog.widgets.kbd import Keyboard, Button
-from pydantic import constr, model_validator, BeforeValidator, ConfigDict, BaseModel
+from aiogram_dialog.widgets.kbd import Button
+from pydantic import (
+    constr,
+    model_validator,
+    BeforeValidator,
+    ConfigDict,
+    BaseModel,
+)
 
 from core.decorators import singleton
 from core.exceptions import (
@@ -21,7 +34,8 @@ class CategoryName(Enum):
     """The CategoryName class represents the names of categories for functions.
 
     :cvar func: The name of the 'func' category.
-        This category is used for other functions, such as data getters, setters, filers, conditions, and others.
+        This category is used for other functions, such as data
+        getters, setters, filers, conditions, and others.
     :vartype func: CategoryName
     :cvar notify: The name of the 'notify' category.
         This category uses for notification functions
@@ -33,10 +47,12 @@ class CategoryName(Enum):
 
 
 class Category:
-    """The Category class represents a category of functions and provides methods for registering and retrieving
+    """The Category class represents a category of functions
+        and provides methods for registering and retrieving
     functions within the category.
 
-    :param name: The name of the category, if not provided, the category will be named 'func'.
+    :param name: The name of the category, if not provided,
+        the category will be named 'func'.
     :type name: CategoryName
 
     :ivar _name: The name of the category
@@ -59,8 +75,10 @@ class Category:
         :param function: The function to register
         :type function: Union[Callable, Awaitable]
 
-        :raises FunctionRegistrationError: If the function is already registered within the category
-        :raises InvalidFunctionType: If the function is not a Callable or an Awaitable object
+        :raises FunctionRegistrationError: If the function is
+            already registered within the category
+        :raises InvalidFunctionType: If the function is not a Callable
+            or an Awaitable object
         """
 
         if not isinstance(function, (Callable, Awaitable)):
@@ -78,7 +96,8 @@ class Category:
         :param function_name: The name of the function to retrieve
         :type function_name: str
 
-        :return: The retrieved function or None if the function is not registered within the category
+        :return: The retrieved function or None if the function
+            is not registered within the category
         :rtype: Union[Callable, Awaitable, None]
         """
 
@@ -87,7 +106,8 @@ class Category:
 
 @singleton
 class FuncsRegistry:
-    """The FuncsRegistry class manages the registration and retrieval of functions.
+    """The FuncsRegistry class manages the registration
+    and retrieval of functions.
 
     :ivar _categories_map_: A dictionary of categories
     :vartype _categories_: Dict[str, Category]
@@ -121,7 +141,8 @@ class FuncsRegistry:
 
         :param function: The function to be registered.
         :type function: Union[Callable, Awaitable]
-        :param category_name: The name of the category. Defaults to `CategoryName.func`.
+        :param category_name: The name of the category.
+            Defaults to `CategoryName.func`.
         :type category_name: Union[str, CategoryName], optional
         """
 
@@ -151,7 +172,8 @@ class FuncsRegistry:
     def get_function(
         self, function_name: str, category_name: str = CategoryName.func.value
     ) -> Union[Callable, Awaitable]:
-        """Retrieves the function with the specified name from the specified category.
+        """Retrieves the function with the specified name
+        from the specified category.
 
         :param category_name: The name of the category. Defaults to `funcs`
         :type category_name: Union[str, CategoryName]
@@ -195,7 +217,7 @@ class FuncModel(BaseModel):
 
     @property
     def data(self) -> Dict:
-        return clean_empty(dict(extra_data=self.model_extra))
+        return clean_empty({"extra_data": self.model_extra})
 
     @property
     def func(self):
@@ -239,12 +261,12 @@ class NotifyModel(FuncModel):
     @property
     def data(self) -> Dict:
         return clean_empty(
-            dict(
-                text=self.text,
-                show_alert=self.show_alert,
-                delay=self.delay,
-                extra_data=self.model_extra,
-            )
+            {
+                "text": self.text,
+                "show_alert": self.show_alert,
+                "delay": self.delay,
+                "extra_data": self.model_extra,
+            }
         )
 
     @classmethod

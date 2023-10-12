@@ -1,8 +1,9 @@
-"""The main functionality of the `core.states`
-module is to manage and store states and state groups used in a dialog FSM system.
+"""The main functionality of the `core.states` module is to manage
+and store states and state groups used in a dialog FSM system.
 
-It provides the necessary functionality to dynamically build and manage the states and state groups
-used in a dialog FSM system.
+It provides the necessary functionality to dynamically
+build and manage the states and state groups used
+in a dialog FSM system.
 
 Futures:
 ---------
@@ -11,7 +12,8 @@ Futures:
 
 Classes:
 ---------
-- YAMLStatesManager: A singleton class responsible for managing and storing states and state groups.
+- YAMLStatesManager: A singleton class responsible
+for managing and storing states and state groups.
 """
 
 from collections import defaultdict
@@ -25,7 +27,8 @@ from core.exceptions import DialogYamlException, StatesGroupNotFoundError
 
 @singleton
 class YAMLStatesManager:
-    """A singleton class responsible for managing and storing states and state groups used in a dialog FSM system.
+    """A singleton class responsible for managing and storing states
+    and state groups used in a dialog FSM system.
 
     - Manages and stores states and state groups used in a dialog system
     - Loads states from data
@@ -34,7 +37,8 @@ class YAMLStatesManager:
 
     :ivar DELIMITER: The delimiter used to separate state names
     :vartype DELIMITER: str
-    :ivar _states_groups_map_: A Dictionary that maps state names to states and state groups.
+    :ivar _states_groups_map_: A Dictionary that maps state names
+        to states and state groups.
     :vartype _states_groups_map_: Dict[str, Union[State, StatesGroup]]
     """
 
@@ -75,10 +79,12 @@ class YAMLStatesManager:
         return result
 
     def build_states_from_yaml_data(self, input_data: Dict) -> None:
-        """Builds the state object from YAML data and extends to `_states_groups_map_`.
+        """Builds the state object from YAML data
+        and extends to `_states_groups_map_`.
 
         Example valid data:
-            {'dialogs': {'group1': {'windows': {'state1': {}, 'state2': {}, ...}}, ...}}
+            {'dialogs': {'group1': {'windows':
+            {'state1': {}, 'state2': {}, ...}}, ...}}
 
         When:
             - "group1" is `StatesGroup` name
@@ -86,7 +92,8 @@ class YAMLStatesManager:
             - ... are other `StatesGroup` and `State`
 
         Explained:
-            This will build and extend group1 states group and his state1 and state2 states.
+            This will build and extend group1 states group
+            and his state1 and state2 states.
             Keys "dialogs" and "windows" are !required in input_data
 
         :param input_data: The data to load states from
@@ -100,7 +107,9 @@ class YAMLStatesManager:
 
         try:
             for group_name, group_data in input_data["dialogs"].items():
-                states = self._build_states(group_data["windows"].keys(), group_name)
+                states = self._build_states(
+                    group_data["windows"].keys(), group_name
+                )
                 states_group = self._build_states_group(group_name, states)
 
                 self.add_states_group_to_map(group_name, states_group)
@@ -108,8 +117,9 @@ class YAMLStatesManager:
 
         except (TypeError, KeyError, AttributeError) as e:
             raise DialogYamlException(
-                f'Invalid data. Use the "DialogYAMLBuilder.check_yaml_data_base_structure" '
-                f"function before using this method. Error: {e}"
+                'Invalid data. Use the "check_yaml_data_base_structure" '
+                "function from class DialogYAMLBuilder "
+                f"before using this method. Error: {e}"
             )
 
     @classmethod
@@ -125,20 +135,24 @@ class YAMLStatesManager:
         :rtype: Dict[str, State]
         """
 
-        return {state_name: State(state_name, group_name) for state_name in values}
+        return {
+            state_name: State(state_name, group_name) for state_name in values
+        }
 
     @classmethod
     def _build_states_group(
         cls, group_name: str, states: Dict[str, State]
     ) -> StatesGroup:
-        """Builds a new StatesGroup subclass dynamically based on the given group name and states.
+        """Builds a new StatesGroup subclass dynamically based
+        on the given group name and states.
 
         :param group_name: The name of the new StatesGroup subclass.
         :type group_name: str
         :param states: The Dictionary of state names and State objects.
         :type states: Dict[str, State]
 
-        :return: A new instance of the dynamically created StatesGroup subclass.
+        :return: A new instance of the dynamically
+            created StatesGroup subclass.
         :rtype: StatesGroup
         """
 
@@ -146,8 +160,11 @@ class YAMLStatesManager:
         return group_class()
 
     @classmethod
-    def extract_group_and_state_names(cls, raw_states_group: str) -> (str, str):
-        """Extracts the group name and state name from the given raw states group string.
+    def extract_group_and_state_names(
+        cls, raw_states_group: str
+    ) -> (str, str):
+        """Extracts the group name and state name from
+        the given raw states group string.
 
         :param raw_states_group: The raw states group.
         :type raw_states_group: str
@@ -160,21 +177,24 @@ class YAMLStatesManager:
 
         if not isinstance(raw_states_group, str):
             raise DialogYamlException(
-                f"Invalid state name {raw_states_group!r}. Expected str, got {type(raw_states_group)}"
+                f"Invalid state name {raw_states_group!r}. "
+                f"Expected str, got {type(raw_states_group)}"
             )
 
-        if raw_states_group.startswith(cls.DELIMITER) or raw_states_group.endswith(
+        if raw_states_group.startswith(
             cls.DELIMITER
-        ):
+        ) or raw_states_group.endswith(cls.DELIMITER):
             raise DialogYamlException(
-                f"Invalid state name {raw_states_group!r}. Wrong delimiter {cls.DELIMITER!r}"
+                f"Invalid state name {raw_states_group!r}. "
+                f"Wrong delimiter {cls.DELIMITER!r}"
             )
 
         delimiter_count = raw_states_group.count(cls.DELIMITER)
         if not (0 < delimiter_count < 2):
             raise DialogYamlException(
                 f"Invalid state name {raw_states_group!r}. "
-                f"Wrong number of delimiters {delimiter_count} for {cls.DELIMITER!r} delimiter"
+                f"Wrong number of delimiters {delimiter_count} "
+                f"for {cls.DELIMITER!r} delimiter"
             )
 
         return raw_states_group.split(cls.DELIMITER)
@@ -193,7 +213,9 @@ class YAMLStatesManager:
 
         parsed_states = defaultdict(list)
         for raw_states in raw_states_list:
-            group_name, state_name = self.extract_group_and_state_names(raw_states)
+            group_name, state_name = self.extract_group_and_state_names(
+                raw_states
+            )
             parsed_states[group_name].append(state_name)
 
         result = {}
@@ -249,7 +271,9 @@ class YAMLStatesManager:
         state.set_parent(states_group.__class__)
         self._states_groups_map_[state_name] = state
 
-    def add_states_to_map(self, group_name: str, states: Dict[str, State]) -> None:
+    def add_states_to_map(
+        self, group_name: str, states: Dict[str, State]
+    ) -> None:
         """Adds states to the states groups map.
 
         :param group_name: The group name
@@ -282,7 +306,8 @@ class YAMLStatesManager:
 
     @classmethod
     def format_state_name(cls, group_name: str, state_name: str) -> str:
-        """Format the state name by concatenating the group name and the state name.
+        """Format the state name by concatenating
+        the group name and the state name.
 
         :param group_name: The group name
         :type group_name: str
@@ -299,7 +324,8 @@ class YAMLStatesManager:
         self, custom_state_class: Type[StatesGroup]
     ) -> None:
         """It creates an instance of the custom `StatesGroup` class,
-        extracts the states from the instance, and adds them to the _states_groups_map_.
+        extracts the states from the instance, and adds them
+        to the _states_groups_map_.
 
         :param custom_state_class: The custom `StatesGroup` class
         :type custom_state_class: Type[StatesGroup]
@@ -307,7 +333,8 @@ class YAMLStatesManager:
         :return: None
         :rtype: None
 
-        :raises DialogYamlException: If the custom `StatesGroup` class is not a subclass of `StatesGroup`.
+        :raises DialogYamlException: If the custom `StatesGroup` class is not
+            a subclass of `StatesGroup`.
         """
 
         group_name = custom_state_class.__name__
@@ -327,4 +354,6 @@ class YAMLStatesManager:
             }
             self.add_states_to_map(group_name, states)
         else:
-            raise DialogYamlException(f"{group_name!r} must have at least one state.")
+            raise DialogYamlException(
+                f"{group_name!r} must have at least one state."
+            )

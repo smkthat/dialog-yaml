@@ -4,7 +4,7 @@ from typing import Any, Self
 from aiogram_dialog.api.internal import Widget
 from pydantic import ConfigDict, BaseModel
 
-from core.models.funcs import FuncField
+from core.models.funcs.func import FuncField
 
 
 class YAMLModel(BaseModel, ABC):

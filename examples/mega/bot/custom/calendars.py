@@ -77,10 +77,10 @@ class CustomCalendar(Calendar):
 class CustomCalendarModel(CalendarModel):
     def to_object(self) -> CustomCalendar:
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                on_click=self.on_click.func if self.on_click else None,
-                when=self.when.func if self.when else None,
-            )
+            {
+                "id": self.id,
+                "on_click": self.on_click.func if self.on_click else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return CustomCalendar(**kwargs)

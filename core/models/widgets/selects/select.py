@@ -4,8 +4,8 @@ from typing import Union, Self
 from aiogram_dialog.widgets.kbd import Checkbox, Select, Radio, Multiselect
 
 from core.models.base import WidgetModel
-from core.models.funcs import FuncModel, FuncField
-from core.models.widgets.texts import TextField, FormatModel
+from core.models.funcs.func import FuncModel, FuncField
+from core.models.widgets.texts.text import TextField, FormatModel
 from core.utils import clean_empty
 
 
@@ -17,19 +17,19 @@ class CheckboxModel(WidgetModel):
     default: bool = True
 
     def to_object(self) -> Checkbox:
-        args = [
+        args = (
             self.checked.to_object(),
             self.unchecked.to_object(),
-        ]
+        )
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                when=self.when.func if self.when else None,
-                on_state_changed=self.on_state_changed.func
+            {
+                "id": self.id,
+                "when": self.when.func if self.when else None,
+                "on_state_changed": self.on_state_changed.func
                 if self.on_state_changed
                 else None,
-                default=self.default,
-            )
+                "default": self.default,
+            }
         )
         return Checkbox(*args, **kwargs)
 
@@ -54,14 +54,14 @@ class SelectModel(WidgetModel):
         if isinstance(item_id_getter, str):
             item_id_getter = FuncModel.to_model(item_id_getter).func
         kwargs = clean_empty(
-            dict(
-                text=self.text.to_object(),
-                id=self.id,
-                items=self.items,
-                item_id_getter=item_id_getter,
-                on_click=self.on_click.func if self.on_click else None,
-                when=self.when.func if self.when else None,
-            )
+            {
+                "text": self.text.to_object(),
+                "id": self.id,
+                "items": self.items,
+                "item_id_getter": item_id_getter,
+                "on_click": self.on_click.func if self.on_click else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return Select(**kwargs)
 
@@ -70,8 +70,8 @@ class SelectModel(WidgetModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, dict):
-            if format := data.get("format"):
-                data["text"] = FormatModel.to_model(data.pop("format"))
+            if formatted_text := data.pop("format", {}):
+                data["text"] = FormatModel.to_model(formatted_text)
         return cls(**data)
 
 
@@ -94,15 +94,15 @@ class RadioModel(WidgetModel):
         if isinstance(item_id_getter, str):
             item_id_getter = FuncModel.to_model(item_id_getter).func
         kwargs = clean_empty(
-            dict(
-                id=self.id,
-                when=self.when.func if self.when else None,
-                items=self.items,
-                item_id_getter=item_id_getter,
-                on_state_changed=self.on_state_changed.func
+            {
+                "id": self.id,
+                "when": self.when.func if self.when else None,
+                "items": self.items,
+                "item_id_getter": item_id_getter,
+                "on_state_changed": self.on_state_changed.func
                 if self.on_state_changed
                 else None,
-            )
+            }
         )
         return Radio(*args, **kwargs)
 
@@ -126,18 +126,18 @@ class MultiSelectModel(SelectModel, CheckboxModel):
         if isinstance(item_id_getter, str):
             item_id_getter = FuncModel.to_model(item_id_getter).func
         kwargs = clean_empty(
-            dict(
-                checked_text=self.checked.to_object(),
-                unchecked_text=self.unchecked.to_object(),
-                id=self.id,
-                items=self.items,
-                item_id_getter=item_id_getter,
-                on_state_changed=self.on_state_changed.func
+            {
+                "checked_text": self.checked.to_object(),
+                "unchecked_text": self.unchecked.to_object(),
+                "id": self.id,
+                "items": self.items,
+                "item_id_getter": item_id_getter,
+                "on_state_changed": self.on_state_changed.func
                 if self.on_state_changed
                 else None,
-                on_click=self.on_click.func if self.on_click else None,
-                when=self.when.func if self.when else None,
-            )
+                "on_click": self.on_click.func if self.on_click else None,
+                "when": self.when.func if self.when else None,
+            }
         )
         return Multiselect(**kwargs)
 

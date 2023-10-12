@@ -7,7 +7,10 @@ from aiogram_dialog.widgets.kbd import Button
 
 
 async def notify_extra(
-    callback: CallbackQuery, button: Button, dialog_manager: DialogManager, data: Dict
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+    data: Dict,
 ) -> None:
     if extra_data := data.pop("extra_data", {}):
         text = data["text"]
@@ -17,15 +20,23 @@ async def notify_extra(
 
 
 async def on_click_simple(
-    callback: CallbackQuery, button: Button, dialog_manager: DialogManager, **kwargs
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+    **kwargs,
 ):
     await callback.message.answer("Clicked!")
 
 
 async def on_click_with_data(
-    callback: CallbackQuery, button: Button, dialog_manager: DialogManager, data: Dict
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+    data: Dict,
 ):
-    await callback.message.answer(json.dumps(data, indent=4, ensure_ascii=False))
+    await callback.message.answer(
+        json.dumps(data, indent=4, ensure_ascii=False)
+    )
 
 
 def register_notifies(registry):

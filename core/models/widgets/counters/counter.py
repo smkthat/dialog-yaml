@@ -4,8 +4,8 @@ from aiogram_dialog.widgets.kbd import Counter
 from aiogram_dialog.widgets.text import Progress
 
 from core.models.base import WidgetModel
-from core.models.funcs import FuncField
-from core.models.widgets.texts import TextField
+from core.models.funcs.func import FuncField
+from core.models.widgets.texts.text import TextField
 from core.utils import clean_empty
 
 
@@ -16,13 +16,15 @@ class ProgressModel(WidgetModel):
     empty: TextField = None
 
     def to_object(self) -> Progress:
-        kwargs = clean_empty(dict(
-            field=self.field.val,
-            width=self.width,
-            filled=self.filled.val,
-            empty=self.empty.val,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            {
+                "field": self.field.val,
+                "width": self.width,
+                "filled": self.filled.val,
+                "empty": self.empty.val,
+                "when": self.when.func if self.when else None,
+            }
+        )
         return Progress(**kwargs)
 
     @classmethod
@@ -30,7 +32,7 @@ class ProgressModel(WidgetModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
-            data = dict(field=dict(val=data, formatted=True))
+            data = {"field": {"val": data, "formatted": True}}
         return cls(**data)
 
 
@@ -48,20 +50,26 @@ class CounterModel(WidgetModel):
     on_value_changed: FuncField = None
 
     def to_object(self) -> Counter:
-        kwargs = clean_empty(dict(
-            id=self.id,
-            plus=self.plus.to_object() if self.plus else None,
-            minus=self.minus.to_object() if self.minus else None,
-            text=self.text.to_object() if self.text else None,
-            min_value=self.min_value,
-            max_value=self.max_value,
-            increment=self.increment,
-            default=self.default,
-            cycle=self.cycle,
-            on_click=self.on_text_click.func if self.on_text_click else None,
-            on_value_changed=self.on_value_changed.func if self.on_value_changed else None,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            {
+                "id": self.id,
+                "plus": self.plus.to_object() if self.plus else None,
+                "minus": self.minus.to_object() if self.minus else None,
+                "text": self.text.to_object() if self.text else None,
+                "min_value": self.min_value,
+                "max_value": self.max_value,
+                "increment": self.increment,
+                "default": self.default,
+                "cycle": self.cycle,
+                "on_click": self.on_text_click.func
+                if self.on_text_click
+                else None,
+                "on_value_changed": self.on_value_changed.func
+                if self.on_value_changed
+                else None,
+                "when": self.when.func if self.when else None,
+            }
+        )
         return Counter(**kwargs)
 
     @classmethod
@@ -69,5 +77,5 @@ class CounterModel(WidgetModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
-            data = dict(id=data)
+            data = {"id": data}
         return cls(**data)

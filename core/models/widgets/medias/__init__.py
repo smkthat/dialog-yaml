@@ -1,9 +1,6 @@
-from .media import (
-    StaticMediaModel,
-    DynamicMediaModel
-)
+from .media import StaticMediaModel, DynamicMediaModel
 
-media_classes = dict(
-    static_media=StaticMediaModel,
-    dynamic_media=DynamicMediaModel
-)
+media_classes = {
+    "static_media": StaticMediaModel,
+    "dynamic_media": DynamicMediaModel,
+}

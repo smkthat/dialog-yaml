@@ -2,13 +2,16 @@ from typing import Union, Callable, Awaitable
 
 import pytest
 
-from core.exceptions import FunctionRegistrationError, InvalidFunctionType, CategoryNotFoundError
+from core.exceptions import (
+    FunctionRegistrationError,
+    InvalidFunctionType,
+    CategoryNotFoundError,
+)
 from core.models.funcs.func import Category, FuncsRegistry, CategoryName
 
 
 @pytest.fixture
 def get_test_func() -> Union[Callable, Awaitable]:
-
     def test_func():
         pass
 
@@ -22,7 +25,6 @@ def registry() -> FuncsRegistry:
 
 
 class TestCategory:
-
     def test_register_function_successfully(self, get_test_func):
         # Given
         category = Category()
@@ -51,11 +53,11 @@ class TestCategory:
         category = Category()
 
         # Then
-        assert category._name == 'func'
+        assert category._name == "func"
 
     def test_initialize_category_with_custom_name(self):
         # Given
-        custom_name = 'custom'
+        custom_name = "custom"
 
         # When
         category = Category(custom_name)
@@ -78,7 +80,7 @@ class TestCategory:
         category = Category()
 
         # When
-        retrieved_function = category.get('nonexistent_function')
+        retrieved_function = category.get("nonexistent_function")
 
         # Then
         assert retrieved_function is None
@@ -94,7 +96,6 @@ class TestCategory:
 
 
 class TestFuncRegistry:
-
     def test_func_property(self, registry):
         # Given
         func = registry.func
@@ -111,10 +112,10 @@ class TestFuncRegistry:
 
     def test_get_nonexistent_category(self, registry):
         # Given
-        
+
         # When/Then
         with pytest.raises(CategoryNotFoundError):
-            registry.get_category('nonexistent_category')
+            registry.get_category("nonexistent_category")
 
     def test_register_function_in_notify_category(self, registry, get_test_func):
         # Given
@@ -124,7 +125,10 @@ class TestFuncRegistry:
         registry.register(function, CategoryName.notify)
 
         # Then
-        assert registry.get_function(function.__name__, CategoryName.notify.value) == function
+        assert (
+            registry.get_function(function.__name__, CategoryName.notify.value)
+            == function
+        )
 
     def test_retrieve_function_from_notify_category(self, registry):
         # Given
@@ -132,7 +136,9 @@ class TestFuncRegistry:
 
         # When
         registry.register(function, CategoryName.notify)
-        retrieved_function = registry.get_function(function.__name__, CategoryName.notify.value)
+        retrieved_function = registry.get_function(
+            function.__name__, CategoryName.notify.value
+        )
 
         # Then
         assert retrieved_function == function
@@ -140,7 +146,7 @@ class TestFuncRegistry:
     def test_register_function_in_custom_category(self, registry):
         # Given
         function = get_test_func
-        custom_category = 'custom'
+        custom_category = "custom"
 
         # When/Then
         with pytest.raises(CategoryNotFoundError):

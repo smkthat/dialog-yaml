@@ -12,7 +12,7 @@ async def product_getter(**_kwargs):
 
 
 async def paging_getter(dialog_manager: DialogManager, **_kwargs):
-    current_page = await dialog_manager.find('stub_scroll').get_page()
+    current_page = await dialog_manager.find("stub_scroll").get_page()
     return {
         "pages": 7,
         "current_page": current_page + 1,

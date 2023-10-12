@@ -1,22 +1,12 @@
-from .scroll import (
-    ScrollingTextModel,
-    SwitchPageModel,
-    StubScrollModel,
-    NumberedPagerModel,
-    FirstPageModel,
-    PrevPageModel,
-    CurrentPageModel,
-    NextPageModel,
-    LastPageModel
-)
+from . import scroll
 
-scroll_classes = dict(
-    scrolling_text=ScrollingTextModel,
-    stub_scroll=StubScrollModel,
-    numbered_pager=NumberedPagerModel,
-    first_page=FirstPageModel,
-    prev_page=PrevPageModel,
-    current_page=CurrentPageModel,
-    next_page=NextPageModel,
-    last_page=LastPageModel,
-)
+scroll_classes = {
+    "scrolling_text": scroll.ScrollingTextModel,
+    "stub_scroll": scroll.StubScrollModel,
+    "numbered_pager": scroll.NumberedPagerModel,
+    "first_page": scroll.FirstPageModel,
+    "prev_page": scroll.PrevPageModel,
+    "current_page": scroll.CurrentPageModel,
+    "next_page": scroll.NextPageModel,
+    "last_page": scroll.LastPageModel,
+}

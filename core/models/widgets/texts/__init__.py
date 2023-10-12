@@ -1,16 +1,9 @@
-from .text import (
-    TextModel,
-    FormatModel,
-    MultiTextModel,
-    CaseModel,
-    ListModel,
-    TextField
-)
+from core.models.widgets.texts import text
 
-text_classes = dict(
-    text=TextModel,
-    format=FormatModel,
-    multi=MultiTextModel,
-    case=CaseModel,
-    list=ListModel
-)
+text_classes = {
+    "text": text.TextModel,
+    "format": text.FormatModel,
+    "multi": text.MultiTextModel,
+    "case": text.CaseModel,
+    "list": text.ListModel,
+}

@@ -5,10 +5,12 @@ from aiogram.types import TelegramObject
 
 
 class DialogYAMLMiddleware(BaseMiddleware):
-    async def __call__(self,
-                       handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-                       event: TelegramObject,
-                       data: Dict[str, Any]) -> Any:
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any],
+    ) -> Any:
         data["dialog_yaml"] = self.dialog_yaml
         return await handler(event, data)
 

@@ -7,7 +7,7 @@ from .scrolls import scroll_classes
 from .selects import select_classes
 from .texts import text_classes
 
-widget_classes = dict(
+widget_classes = {
     **calendar_classes,
     **counter_classes,
     **input_classes,
@@ -15,5 +15,5 @@ widget_classes = dict(
     **media_classes,
     **scroll_classes,
     **select_classes,
-    **text_classes
-)
+    **text_classes,
+}

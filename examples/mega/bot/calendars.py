@@ -8,10 +8,10 @@ from core import FuncsRegistry
 
 
 async def on_date_selected(
-        callback: CallbackQuery,
-        widget: ManagedCalendar,
-        manager: DialogManager,
-        selected_date: date,
+    callback: CallbackQuery,
+    widget: ManagedCalendar,
+    manager: DialogManager,
+    selected_date: date,
 ):
     await callback.answer(str(selected_date))
 

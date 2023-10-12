@@ -1,3 +1,2 @@
-from .core import DialogYAMLBuilder
-from .models.funcs import FuncsRegistry
-from .core import models_classes
+from core.core import DialogYAMLBuilder
+from core.models.funcs.func import FuncsRegistry

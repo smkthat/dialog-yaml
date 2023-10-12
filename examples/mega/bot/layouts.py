@@ -1,4 +1,4 @@
-from core.models.funcs import FuncsRegistry
+from core import FuncsRegistry
 
 
 def get_fruit_item(x):

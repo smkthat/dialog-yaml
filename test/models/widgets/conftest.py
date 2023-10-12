@@ -10,7 +10,6 @@ from core.states import YAMLStatesManager
 
 @pytest.fixture
 def get_test_func() -> Union[Callable, Awaitable]:
-
     def test_func():
         pass
 
@@ -19,14 +18,13 @@ def get_test_func() -> Union[Callable, Awaitable]:
 
 @pytest.fixture
 def get_test_notify() -> Union[Callable, Awaitable]:
-
     def notify_func():
         pass
 
     return notify_func
 
 
-data_value = ['a', 'b', 'c']
+data_value = ["a", "b", "c"]
 
 
 @pytest.fixture
@@ -50,13 +48,15 @@ def func_registry(get_test_func, get_test_notify, get_test_getter) -> FuncsRegis
 @pytest.fixture
 def states_builder():
     states_builder = YAMLStatesManager()
-    states = states_builder.parse_raw_states_from_list({
-        'group1:state1',
-        'group1:state2',
-        'group1:state3',
-        'group2:state1',
-        'group2:state2',
-    })
+    states = states_builder.parse_raw_states_from_list(
+        {
+            "group1:state1",
+            "group1:state2",
+            "group1:state3",
+            "group2:state1",
+            "group2:state2",
+        }
+    )
     states_builder._states_groups_map_.update(states)
     return states_builder
 

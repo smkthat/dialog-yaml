@@ -16,13 +16,15 @@ class ProgressModel(WidgetModel):
     empty: TextField = None
 
     def to_object(self) -> Progress:
-        kwargs = clean_empty(dict(
-            field=self.field.val,
-            width=self.width,
-            filled=self.filled.val,
-            empty=self.empty.val,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            dict(
+                field=self.field.val,
+                width=self.width,
+                filled=self.filled.val,
+                empty=self.empty.val,
+                when=self.when.func if self.when else None,
+            )
+        )
         return Progress(**kwargs)
 
     @classmethod
@@ -48,20 +50,24 @@ class CounterModel(WidgetModel):
     on_value_changed: FuncField = None
 
     def to_object(self) -> Counter:
-        kwargs = clean_empty(dict(
-            id=self.id,
-            plus=self.plus.to_object() if self.plus else None,
-            minus=self.minus.to_object() if self.minus else None,
-            text=self.text.to_object() if self.text else None,
-            min_value=self.min_value,
-            max_value=self.max_value,
-            increment=self.increment,
-            default=self.default,
-            cycle=self.cycle,
-            on_click=self.on_text_click.func if self.on_text_click else None,
-            on_value_changed=self.on_value_changed.func if self.on_value_changed else None,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            dict(
+                id=self.id,
+                plus=self.plus.to_object() if self.plus else None,
+                minus=self.minus.to_object() if self.minus else None,
+                text=self.text.to_object() if self.text else None,
+                min_value=self.min_value,
+                max_value=self.max_value,
+                increment=self.increment,
+                default=self.default,
+                cycle=self.cycle,
+                on_click=self.on_text_click.func if self.on_text_click else None,
+                on_value_changed=self.on_value_changed.func
+                if self.on_value_changed
+                else None,
+                when=self.when.func if self.when else None,
+            )
+        )
         return Counter(**kwargs)
 
     @classmethod

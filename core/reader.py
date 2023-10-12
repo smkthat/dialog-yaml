@@ -10,7 +10,7 @@ class YAMLReader:
     """
 
     @classmethod
-    def read_data_to_dict(cls, data_file_path: str, data_dir_path: str = '') -> dict:
+    def read_data_to_dict(cls, data_file_path: str, data_dir_path: str = "") -> dict:
         """Reads data from a YAML file and returns it as a dictionary.
 
         :param data_file_path: Path to the YAML file.
@@ -23,16 +23,17 @@ class YAMLReader:
         """
 
         YamlIncludeConstructor.add_to_loader_class(
-            loader_class=yaml.FullLoader,
-            base_dir=data_dir_path
+            loader_class=yaml.FullLoader, base_dir=data_dir_path
         )
 
-        abs_data_file_path = os.path.abspath(os.path.join(data_dir_path, data_file_path))
+        abs_data_file_path = os.path.abspath(
+            os.path.join(data_dir_path, data_file_path)
+        )
 
         if not os.path.exists(abs_data_file_path):
-            raise FileNotFoundError(f'File not found {abs_data_file_path!r}.')
+            raise FileNotFoundError(f"File not found {abs_data_file_path!r}.")
 
-        with open(abs_data_file_path, 'r') as file:
+        with open(abs_data_file_path, "r") as file:
             data = yaml.load(file, Loader=yaml.FullLoader)
 
         return data

@@ -4,7 +4,7 @@ from .text import (
     MultiTextModel,
     CaseModel,
     ListModel,
-    TextField
+    TextField,
 )
 
 text_classes = dict(
@@ -12,5 +12,5 @@ text_classes = dict(
     format=FormatModel,
     multi=MultiTextModel,
     case=CaseModel,
-    list=ListModel
+    list=ListModel,
 )

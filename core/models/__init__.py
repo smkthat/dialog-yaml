@@ -55,18 +55,24 @@ class YAMLModelFactory:
         :raises InvalidTagName: When the tag is invalid
         """
         if not tag or not isinstance(tag, str):
-            raise InvalidTagName(tag, '{tag!r} must be non-empty string')
+            raise InvalidTagName(tag, "{tag!r} must be non-empty string")
 
         if tag.isdigit():
-            raise InvalidTagName(tag, '{tag!r} must contain a letters, not only numbers')
+            raise InvalidTagName(
+                tag, "{tag!r} must contain a letters, not only numbers"
+            )
 
-        if not re.fullmatch(r'[a-zA-Z0-9_-]+', tag):
-            raise InvalidTagName(tag, '{tag!r} must contains only latin letters and numbers')
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+", tag):
+            raise InvalidTagName(
+                tag, "{tag!r} must contains only latin letters and numbers"
+            )
 
         return True
 
     @classmethod
-    def is_valid_model_class(cls, tag: str, model_class: Union[Type[YAMLModel], Type[BaseModel]]) -> bool:
+    def is_valid_model_class(
+        cls, tag: str, model_class: Union[Type[YAMLModel], Type[BaseModel]]
+    ) -> bool:
         """Check if the given model class is a valid model class for the specified tag.
 
         :param tag: The tag associated with the model class.
@@ -82,14 +88,17 @@ class YAMLModelFactory:
 
         if not model_class or not issubclass(model_class, (YAMLModel, BaseModel)):
             raise ModelRegistrationError(
-                tag, model_class,
-                message='{model_class!r} mapped to {tag!r} must be type of YAMLModel or BaseModel'
+                tag,
+                model_class,
+                message="{model_class!r} mapped to {tag!r} must be type of YAMLModel or BaseModel",
             )
 
         return True
 
     @classmethod
-    def _is_valid(cls, tag: str, model_class: Union[Type[YAMLModel], Type[BaseModel]]) -> bool:
+    def _is_valid(
+        cls, tag: str, model_class: Union[Type[YAMLModel], Type[BaseModel]]
+    ) -> bool:
         """Check if the given tag is valid for the specified model class.
 
         :param tag: The tag associated with the model class.
@@ -106,7 +115,9 @@ class YAMLModelFactory:
         return True
 
     @classmethod
-    def add_model_class(cls, tag: str, model_class: Type[YAMLModel], replace_existing: bool = False):
+    def add_model_class(
+        cls, tag: str, model_class: Type[YAMLModel], replace_existing: bool = False
+    ):
         """Registers a custom model class with a unique tag.
 
         :param tag: A unique tag for the custom model class.
@@ -124,8 +135,9 @@ class YAMLModelFactory:
 
             if registered_model_class and not replace_existing:
                 raise ModelRegistrationError(
-                    tag, registered_model_class,
-                    message='{tag!r} already registered with {model_class!r}'
+                    tag,
+                    registered_model_class,
+                    message="{tag!r} already registered with {model_class!r}",
                 )
 
             cls._models_classes[tag] = model_class
@@ -141,7 +153,7 @@ class YAMLModelFactory:
         :rtype: Type[YAMLModel] or None
         """
 
-        logger.debug(f'Get class for tag {tag!r}')
+        logger.debug(f"Get class for tag {tag!r}")
         return cls._models_classes.get(tag)
 
     @classmethod
@@ -155,7 +167,9 @@ class YAMLModelFactory:
         """
 
         if not isinstance(models_classes, dict):
-            raise DialogYamlException("models_classes must be a dictionary of strings to YAMLModel classes")
+            raise DialogYamlException(
+                "models_classes must be a dictionary of strings to YAMLModel classes"
+            )
 
         for key, value in models_classes.items():
             cls._is_valid(key, value)
@@ -185,11 +199,11 @@ class YAMLModelFactory:
         model_class = cls.get_model_class(tag)
 
         data = yaml_data[tag]
-        logger.debug(f'Parse tag {tag!r}: {data}')
+        logger.debug(f"Parse tag {tag!r}: {data}")
 
         try:
             model = model_class.to_model(data)
         except ValidationError as e:
-            raise DialogYamlException(f'Failed to parse tag {tag!r}: {e}')
+            raise DialogYamlException(f"Failed to parse tag {tag!r}: {e}")
 
         return model

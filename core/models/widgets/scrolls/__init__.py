@@ -7,7 +7,7 @@ from .scroll import (
     PrevPageModel,
     CurrentPageModel,
     NextPageModel,
-    LastPageModel
+    LastPageModel,
 )
 
 scroll_classes = dict(

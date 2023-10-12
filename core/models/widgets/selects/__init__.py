@@ -1,6 +1,4 @@
-from .select import (
-    CheckboxModel, SelectModel, RadioModel, MultiSelectModel
-)
+from .select import CheckboxModel, SelectModel, RadioModel, MultiSelectModel
 
 select_classes = dict(
     checkbox=CheckboxModel,

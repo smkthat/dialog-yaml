@@ -21,26 +21,27 @@ class WindowModel(YAMLModel):
     preview_data: FuncField = None
 
     def to_object(self) -> Window:
-        kwargs = clean_empty(dict(
-            state=YAMLStatesManager().get_by_name(self.state),
-            getter=self.getter.func if self.getter else None,
-            parse_mode=self.parse_mode,
-            disable_web_page_preview=self.disable_web_page_preview,
-            preview_add_transitions=self.preview_add_transitions if self.preview_add_transitions else None,
-            preview_data=self.preview_data.func if self.preview_data else None
-        ))
-        return Window(
-            *[widget.to_object() for widget in self.widgets],
-            **kwargs
+        kwargs = clean_empty(
+            dict(
+                state=YAMLStatesManager().get_by_name(self.state),
+                getter=self.getter.func if self.getter else None,
+                parse_mode=self.parse_mode,
+                disable_web_page_preview=self.disable_web_page_preview,
+                preview_add_transitions=self.preview_add_transitions
+                if self.preview_add_transitions
+                else None,
+                preview_data=self.preview_data.func if self.preview_data else None,
+            )
         )
+        return Window(*[widget.to_object() for widget in self.widgets], **kwargs)
 
-    @field_validator('widgets', mode='before')
+    @field_validator("widgets", mode="before")
     def validate_widgets(cls, value):
         if not value:
             raise ValueError(f"Field widgets can't be empty.")
         return value
 
-    @field_validator('parse_mode', mode='before')
+    @field_validator("parse_mode", mode="before")
     def validate_parse_mode(cls, value):
         if isinstance(value, ParseMode):
             return value

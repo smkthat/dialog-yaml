@@ -17,17 +17,16 @@ class YAMLModel(BaseModel, ABC):
     :vartype model_config: ConfigDict
     """
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        extra='allow'
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
     @classmethod
     @abstractmethod
-    def to_model(cls, data: Any) -> Self: pass
+    def to_model(cls, data: Any) -> Self:
+        pass
 
     @abstractmethod
-    def to_object(self) -> Widget: pass
+    def to_object(self) -> Widget:
+        pass
 
 
 class WidgetModel(YAMLModel):

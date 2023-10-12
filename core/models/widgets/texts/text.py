@@ -14,10 +14,9 @@ class TextModel(WidgetModel):
     val: str
 
     def to_object(self) -> Union[Const, Format]:
-        kwargs = clean_empty(dict(
-            when=self.when.func if self.when else None,
-            text=self.val
-        ))
+        kwargs = clean_empty(
+            dict(when=self.when.func if self.when else None, text=self.val)
+        )
 
         if self.formatted:
             return Format(**kwargs)
@@ -29,7 +28,7 @@ class TextModel(WidgetModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
-            data = {'val': data}
+            data = {"val": data}
         return cls(**data)
 
 
@@ -42,24 +41,22 @@ TextField = Annotated[TextModel, BeforeValidator(TextModel.to_model)]
 
 class MultiTextModel(WidgetModel):
     texts: list[TextField]
-    sep: Optional[str] = '\n'
+    sep: Optional[str] = "\n"
 
     def to_object(self) -> Multi:
-        kwargs = clean_empty(dict(
-            when=self.when.func if self.when else None,
-            sep=self.sep
-        ))
-        return Multi(
-            *[text.to_object() for text in self.texts],
-            **kwargs
+        kwargs = clean_empty(
+            dict(when=self.when.func if self.when else None, sep=self.sep)
         )
+        return Multi(*[text.to_object() for text in self.texts], **kwargs)
 
     @classmethod
     def to_model(cls, data: Union[dict, Self]) -> Self:
         if isinstance(data, cls):
             return Self
-        if texts := data.get('texts'):
-            data['texts'] = [YAMLModelFactory.create_model(text_data) for text_data in texts]
+        if texts := data.get("texts"):
+            data["texts"] = [
+                YAMLModelFactory.create_model(text_data) for text_data in texts
+            ]
         return cls(**data)
 
 
@@ -68,25 +65,28 @@ class CaseModel(WidgetModel):
     selector: Union[str, FuncField]
 
     def to_object(self) -> Case:
-        kwargs = clean_empty(dict(
-            texts={item: value.to_object() for item, value in self.texts.items()},
-            selector=self.selector.func if isinstance(self.selector, FuncModel) else self.selector,
-            when=self.when.func if self.when else None,
-        ))
+        kwargs = clean_empty(
+            dict(
+                texts={item: value.to_object() for item, value in self.texts.items()},
+                selector=self.selector.func
+                if isinstance(self.selector, FuncModel)
+                else self.selector,
+                when=self.when.func if self.when else None,
+            )
+        )
         return Case(**kwargs)
 
     @classmethod
     def to_model(cls, data: Union[dict, Self]) -> Self:
         if isinstance(data, cls):
             return data
-        if texts := data.get('texts'):
-            data['texts'] = {
-                item: TextModel.to_model(text_data)
-                for item, text_data in texts.items()
+        if texts := data.get("texts"):
+            data["texts"] = {
+                item: TextModel.to_model(text_data) for item, text_data in texts.items()
             }
-        if selector := data.get('selector'):
+        if selector := data.get("selector"):
             if isinstance(selector, dict):
-                data['selector'] = YAMLModelFactory.create_model(selector)
+                data["selector"] = YAMLModelFactory.create_model(selector)
         return cls(**data)
 
 
@@ -96,15 +96,17 @@ class ListModel(WidgetModel):
     sep: Optional[str] = "\n"
 
     def to_object(self) -> List:
-        kwargs = clean_empty(dict(
-            field=self.field.to_object(),
-            items=self.items.func if isinstance(self.items, FuncModel) else self.items,
-            sep=self.sep,
-            when=self.when.func if self.when else None
-        ))
-        return List(
-            **kwargs
+        kwargs = clean_empty(
+            dict(
+                field=self.field.to_object(),
+                items=self.items.func
+                if isinstance(self.items, FuncModel)
+                else self.items,
+                sep=self.sep,
+                when=self.when.func if self.when else None,
+            )
         )
+        return List(**kwargs)
 
     @classmethod
     def to_model(cls, data: Union[dict, Self]) -> Self:

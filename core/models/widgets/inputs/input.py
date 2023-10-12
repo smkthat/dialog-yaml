@@ -15,14 +15,16 @@ class MessageInputModel(WidgetModel):
     content_types: list[ContentType] = [ContentType.ANY]
 
     def to_object(self) -> MessageInput:
-        kwargs = clean_empty(dict(
-            func=self.func.func if self.func else None,
-            filter=self.filter.func if self.filter else None,
-            content_types=self.content_types
-        ))
+        kwargs = clean_empty(
+            dict(
+                func=self.func.func if self.func else None,
+                filter=self.filter.func if self.filter else None,
+                content_types=self.content_types,
+            )
+        )
         return MessageInput(**kwargs)
 
-    @field_validator('content_types', mode='before')
+    @field_validator("content_types", mode="before")
     def validate_content_types(cls, value):
         if not value:
             return None

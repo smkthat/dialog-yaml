@@ -17,17 +17,19 @@ class StaticMediaModel(WidgetModel):
     media_params: dict[str, Any] = None
 
     def to_object(self) -> StaticMedia:
-        kwargs = clean_empty(dict(
-            path=self.path.to_object() if self.path else None,
-            url=self.uri.to_object() if self.uri else None,
-            type=self.type,
-            use_pipe=self.use_pipe,
-            media_params=self.media_params,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            dict(
+                path=self.path.to_object() if self.path else None,
+                url=self.uri.to_object() if self.uri else None,
+                type=self.type,
+                use_pipe=self.use_pipe,
+                media_params=self.media_params,
+                when=self.when.func if self.when else None,
+            )
+        )
         return StaticMedia(**kwargs)
 
-    @field_validator('type', mode='before')
+    @field_validator("type", mode="before")
     def validate_type(cls, value: Union[str, ContentType]) -> ContentType:
         if isinstance(value, ContentType):
             return value
@@ -45,10 +47,9 @@ class DynamicMediaModel(WidgetModel):
     selector: str
 
     def to_object(self) -> DynamicMedia:
-        kwargs = clean_empty(dict(
-            when=self.when.func if self.when else None,
-            selector=self.selector
-        ))
+        kwargs = clean_empty(
+            dict(when=self.when.func if self.when else None, selector=self.selector)
+        )
         obj = DynamicMedia(**kwargs)
         return obj
 

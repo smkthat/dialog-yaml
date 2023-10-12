@@ -1,6 +1,6 @@
 import asyncio
 from enum import Enum
-from typing import (Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated)
+from typing import Optional, Dict, Union, Any, Callable, Awaitable, Self, Annotated
 
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
@@ -11,7 +11,8 @@ from core.decorators import singleton
 from core.exceptions import (
     FunctionRegistrationError,
     InvalidFunctionType,
-    CategoryNotFoundError, FunctionNotFoundError
+    CategoryNotFoundError,
+    FunctionNotFoundError,
 )
 from core.utils import clean_empty
 
@@ -27,12 +28,12 @@ class CategoryName(Enum):
     :vartype notify: CategoryName
     """
 
-    func = 'func'
-    notify = 'notify'
+    func = "func"
+    notify = "notify"
 
 
 class Category:
-    """The Category class represents a category of functions and provides methods for registering and retrieving 
+    """The Category class represents a category of functions and provides methods for registering and retrieving
     functions within the category.
 
     :param name: The name of the category, if not provided, the category will be named 'func'.
@@ -67,9 +68,7 @@ class Category:
 
         function_name = function.__name__
         if function_name in self._functions:
-            raise FunctionRegistrationError(
-                self._name, function_name
-            )
+            raise FunctionRegistrationError(self._name, function_name)
 
         self._functions[function_name] = function
 
@@ -93,6 +92,7 @@ class FuncsRegistry:
     :ivar _categories_map_: A dictionary of categories
     :vartype _categories_: Dict[str, Category]
     """
+
     _categories_map_: Dict[str, Category]
 
     def __init__(self):
@@ -112,8 +112,11 @@ class FuncsRegistry:
     def notify(self) -> Category:
         return self._categories_map_[CategoryName.notify.value]
 
-    def register(self, function: Union[Callable, Awaitable],
-                 category_name: Union[str, CategoryName] = CategoryName.func) -> None:
+    def register(
+        self,
+        function: Union[Callable, Awaitable],
+        category_name: Union[str, CategoryName] = CategoryName.func,
+    ) -> None:
         """Registers a function in the specified category.
 
         :param function: The function to be registered.
@@ -146,7 +149,7 @@ class FuncsRegistry:
         raise CategoryNotFoundError(name)
 
     def get_function(
-            self, function_name: str, category_name: str = CategoryName.func.value
+        self, function_name: str, category_name: str = CategoryName.func.value
     ) -> Union[Callable, Awaitable]:
         """Retrieves the function with the specified name from the specified category.
 
@@ -165,12 +168,12 @@ class FuncsRegistry:
 
 
 async def notify_func(
-        callback: CallbackQuery,
-        button: Button,
-        dialog_manager: DialogManager,
-        data: Dict,
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+    data: Dict,
 ) -> None:
-    if delay := data.get('delay'):
+    if delay := data.get("delay"):
         await asyncio.sleep(delay=delay)
     await callback.answer(
         **data,
@@ -185,7 +188,7 @@ class FuncModel(BaseModel):
     def to_object(self) -> Union[Callable, Awaitable]:
         return self.func
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra='allow')
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
     category_name: str = CategoryName.func.value
     name: str
@@ -202,7 +205,7 @@ class FuncModel(BaseModel):
     async def run_async(self, *args, **kwargs):
         asyncio.create_task(self.func(*args, **kwargs))
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_func(self) -> Self:
         category_name = self.category_name
         func_name = self.name
@@ -219,7 +222,7 @@ class FuncModel(BaseModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
-            data = {'name': data}
+            data = {"name": data}
         return cls(**data)
 
 
@@ -228,34 +231,36 @@ FuncField = Annotated[FuncModel, BeforeValidator(FuncModel.to_model)]
 
 class NotifyModel(FuncModel):
     category_name: str = CategoryName.notify.value
-    name: str = 'notify_func'
+    name: str = "notify_func"
     text: constr(strip_whitespace=True, min_length=1, max_length=200)
     show_alert: bool = False
     delay: Union[int, None] = None
 
     @property
     def data(self) -> Dict:
-        return clean_empty(dict(
-            text=self.text,
-            show_alert=self.show_alert,
-            delay=self.delay,
-            extra_data=self.model_extra
-        ))
+        return clean_empty(
+            dict(
+                text=self.text,
+                show_alert=self.show_alert,
+                delay=self.delay,
+                extra_data=self.model_extra,
+            )
+        )
 
     @classmethod
     def to_model(cls, data: Union[str, dict, Self]) -> Self:
         if isinstance(data, cls):
             return data
         if isinstance(data, dict):
-            if val := data.pop('val'):
-                data['text'] = val
+            if val := data.pop("val"):
+                data["text"] = val
         if isinstance(data, str):
             data = {
-                'text': data,
-                'name': cls.model_fields['name'].default,
-                'category_name': cls.model_fields['category_name'].default,
-                'delay': cls.model_fields['delay'].default,
-                'show_alert': cls.model_fields['show_alert'].default
+                "text": data,
+                "name": cls.model_fields["name"].default,
+                "category_name": cls.model_fields["category_name"].default,
+                "delay": cls.model_fields["delay"].default,
+                "show_alert": cls.model_fields["show_alert"].default,
             }
         return cls(**data)
 

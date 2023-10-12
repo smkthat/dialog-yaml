@@ -11,8 +11,7 @@ from .keyboard import (
     RowKeyboardModel,
     ColumnKeyboardModel,
     ScrollingGroupKeyboardModel,
-
-    GroupKeyboardField
+    GroupKeyboardField,
 )
 
 keyboard_classes = dict(

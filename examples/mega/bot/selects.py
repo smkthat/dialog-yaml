@@ -15,11 +15,11 @@ class Fruit:
 
 async def getter(*args, **_kwargs):
     return {
-        'fruits': [
-            Fruit('1', 'Apple'),
-            Fruit('2', 'Banana'),
-            Fruit('3', 'Orange'),
-            Fruit('4', 'Pear'),
+        "fruits": [
+            Fruit("1", "Apple"),
+            Fruit("2", "Banana"),
+            Fruit("3", "Orange"),
+            Fruit("4", "Pear"),
         ]
     }
 
@@ -29,12 +29,12 @@ def fruit_id_getter(fruit: Fruit) -> str:
 
 
 async def on_item_selected(
-        callback: CallbackQuery,
-        widget: Any,
-        manager: DialogManager,
-        selected_item: str,
+    callback: CallbackQuery,
+    widget: Any,
+    manager: DialogManager,
+    selected_item: str,
 ):
-    await callback.answer(f'item id: {selected_item}')
+    await callback.answer(f"item id: {selected_item}")
 
 
 def register_selects(registry: FuncsRegistry):

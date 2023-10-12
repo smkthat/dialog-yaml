@@ -12,11 +12,13 @@ class CalendarModel(WidgetModel):
     on_click: FuncField = None
 
     def to_object(self) -> Calendar:
-        kwargs = clean_empty(dict(
-            id=self.id,
-            on_click=self.on_click.func if self.on_click else None,
-            when=self.when.func if self.when else None
-        ))
+        kwargs = clean_empty(
+            dict(
+                id=self.id,
+                on_click=self.on_click.func if self.on_click else None,
+                when=self.when.func if self.when else None,
+            )
+        )
         return Calendar(**kwargs)
 
     @classmethod
@@ -24,5 +26,5 @@ class CalendarModel(WidgetModel):
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
-            data = {'id': data}
+            data = {"id": data}
         return cls(**data)

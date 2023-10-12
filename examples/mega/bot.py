@@ -21,10 +21,10 @@ from examples.mega.bot.custom import CustomCalendarModel
 async def start(message: Message, dialog_manager: DialogManager):
     # it is important to reset stack because the user wants to restart everything
     data = dialog_manager.middleware_data
-    dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
+    dialog_yaml: DialogYAMLBuilder = data["dialog_yaml"]
     await dialog_manager.start(
-        state=dialog_yaml.states_manager.get_by_name('Menu:MAIN'),
-        mode=StartMode.RESET_STACK
+        state=dialog_yaml.states_manager.get_by_name("Menu:MAIN"),
+        mode=StartMode.RESET_STACK,
     )
 
 
@@ -40,13 +40,17 @@ async def on_unknown_intent(event: ErrorEvent, dialog_manager: DialogManager):
             await event.update.callback_query.message.delete()
         except TelegramBadRequest:
             with suppress(TelegramBadRequest):
-                await event.update.callback_query.message.edit_caption(caption=' ', reply_markup=None)
+                await event.update.callback_query.message.edit_caption(
+                    caption=" ", reply_markup=None
+                )
             with suppress(TelegramBadRequest):
-                await event.update.callback_query.message.edit_text(text=' ', reply_markup=None)
+                await event.update.callback_query.message.edit_text(
+                    text=" ", reply_markup=None
+                )
     data = dialog_manager.middleware_data
-    dialog_yaml: DialogYAMLBuilder = data['dialog_yaml']
+    dialog_yaml: DialogYAMLBuilder = data["dialog_yaml"]
     await dialog_manager.start(
-        state=dialog_yaml.states_manager.get_by_name('Menu:MAIN'),
+        state=dialog_yaml.states_manager.get_by_name("Menu:MAIN"),
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.SEND,
     )
@@ -64,9 +68,9 @@ async def main():
 
     register_dialog_yaml_funcs(FuncsRegistry())
     dy_builder = DialogYAMLBuilder.build(
-        yaml_file_name='main.yaml',
-        yaml_dir_path='data',
-        models={'my_calendar': CustomCalendarModel},
+        yaml_file_name="main.yaml",
+        yaml_dir_path="data",
+        models={"my_calendar": CustomCalendarModel},
         states=[CustomSG],
         router=Router(),
     )
@@ -79,10 +83,10 @@ async def main():
 
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(dy_builder.router)
-    bot = Bot(token=dotenv_values()['MEGA_BOT_TOKEN'])
+    bot = Bot(token=dotenv_values()["MEGA_BOT_TOKEN"])
     await bot.get_updates(offset=-1)
     await dp.start_polling(bot)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

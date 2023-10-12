@@ -1,5 +1,5 @@
-from functools import partial
-from typing import Union, Self, Any, Annotated
+import functools
+from typing import Union, Self, Any, Annotated, Callable
 
 from aiogram.fsm.state import State
 from aiogram_dialog import StartMode
@@ -51,44 +51,61 @@ class UrlButtonModel(ButtonModel):
 
 class CallbackButtonModel(ButtonModel):
     on_click: FuncField = None
-    pre_on_click: FuncField = None
-    after_on_click: FuncField = None
     notify: NotifyField = None
 
-    def get_partial_on_click(self, on_click: FuncModel = None):
-        partial_data = clean_empty({
-            'on_click_func': on_click.func if on_click else None,
-            'on_click_data': on_click.data if on_click else {},
-            'pre_click_func': self.pre_on_click.func if self.pre_on_click else None,
-            'pre_click_data': self.pre_on_click.data if self.pre_on_click else {},
-            'after_click_func': self.after_on_click.func if self.after_on_click else None,
-            'after_click_data': self.after_on_click.data if self.after_on_click else {},
-            'notify_func': self.notify.func if self.notify else None,
-            'notify_data': self.notify.notify_data if self.notify else {},
-        })
+    def _get_partial_on_click(self) -> Callable:
+        """Returns a partial function that can be used as a callback for a button click event.
 
-        def wrap_functions(*args, **kwargs):
-            if partial_data['notify_func']:
-                partial_data['notify_func'](*args, partial_data['notify_data'])
+        The returned partial function captures the values of `on_click` and `notify` from the `self` object.
 
-            if partial_data['pre_click_func']:
-                partial_data['pre_click_func'](*args, partial_data['pre_click_data'])
+        :return: partial function that can be used as a callback
+        :rtype: Callable
+        """
 
-            if partial_data['on_click_func']:
-                partial_data['on_click_func'](*args, partial_data['on_click_data'])
+        partial_on_click = None
+        partial_data = clean_empty(dict(
+            on_click=self.on_click,
+            notify=self.notify
+        ))
 
-            if partial_data['after_click_func']:
-                partial_data['after_click_func'](*args, partial_data['after_click_data'])
+        async def wrap_functions(*args, **kwargs) -> None:
+            """Function that wraps the `on_click` and `notify` functions.
+
+            :param args: args to pass to `on_click`
+            :param kwargs: kwargs to pass to `on_click`
+
+            :return: None
+            :rtype: None
+            """
+            callback = None
+
+            if notify := self.notify:
+                callback = (notify.func, {
+                    'data': {**notify.data,
+                             **self.model_extra}
+                })
+
+            if on_click := self.on_click:
+                if callback:
+                    await notify.run_async(*args, **callback[1])
+                callback = (on_click.func, {
+                    'data': {**on_click.data,
+                             **self.model_extra}
+                })
+
+            if callback is not None:
+                await callback[0](*args, **callback[1])
+
         if partial_data:
-            on_click = partial(wrap_functions, **partial_data)
-        return on_click
+            partial_on_click = functools.partial(wrap_functions, **partial_data)
+
+        return partial_on_click
 
     def to_object(self) -> Button:
-        partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             text=self.text.to_object() if self.text else None,
             id=self.id,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None
         ))
         return Button(**kwargs)
@@ -99,11 +116,10 @@ class SwitchToModel(CallbackButtonModel):
     state: State
 
     def to_object(self) -> SwitchTo:
-        partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
             text=self.text.to_object() if self.text else None,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None,
             state=self.state
         ))
@@ -130,12 +146,10 @@ class StartModel(CallbackButtonModel):
     state: State
 
     def to_object(self) -> Start:
-        on_click = self.on_click.func if self.on_click else None
-        partial_on_click = self.get_partial_on_click(on_click)
         kwargs = clean_empty(dict(
             id=self.id,
             text=self.text.to_object() if self.text else None,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None,
             state=self.state,
             data=self.data,
@@ -164,11 +178,10 @@ class NextModel(CallbackButtonModel):
     text: TextField = None
 
     def to_object(self) -> Next:
-        partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
             text=self.text.to_object() if self.text else None,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None,
         ))
         return Next(**kwargs)
@@ -178,11 +191,10 @@ class BackModel(CallbackButtonModel):
     text: TextField = None
 
     def to_object(self) -> Back:
-        partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
             text=self.text.to_object() if self.text else None,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None,
         ))
         return Back(**kwargs)
@@ -196,11 +208,10 @@ class CancelModel(CallbackButtonModel):
         result = self.result
         if isinstance(result, FuncModel):
             result = result.func
-        partial_on_click = self.get_partial_on_click(self.on_click)
         kwargs = clean_empty(dict(
             id=self.id,
             text=self.text.to_object() if self.text else None,
-            on_click=partial_on_click,
+            on_click=self._get_partial_on_click(),
             when=self.when.func if self.when else None,
             result=result
         ))

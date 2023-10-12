@@ -2,7 +2,7 @@ import asyncio
 import logging
 from contextlib import suppress
 
-import dotenv
+from dotenv import load_dotenv, dotenv_values
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter
@@ -59,7 +59,7 @@ class CustomSG(StatesGroup):
 
 
 async def main():
-    dotenv.load_dotenv()
+    load_dotenv()
     logging.basicConfig(level=logging.DEBUG)
 
     register_dialog_yaml_funcs(FuncsRegistry())
@@ -77,10 +77,9 @@ async def main():
         ExceptionTypeFilter(UnknownIntent),
     )
 
-    storage = MemoryStorage()
-    dp = Dispatcher(storage=storage)
+    dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(dy_builder.router)
-    bot = Bot(token=dotenv.dotenv_values().get('MEGA_BOT_TOKEN'))
+    bot = Bot(token=dotenv_values()['MEGA_BOT_TOKEN'])
     await bot.get_updates(offset=-1)
     await dp.start_polling(bot)
 

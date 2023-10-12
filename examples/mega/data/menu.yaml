@@ -33,4 +33,8 @@ windows:
           text: "🔢 Multiple steps"
           id: switch
           state: Switch:MAIN
+      - start:
+          text: "🔁 Callbacks"
+          id: callbacks
+          state: Callbacks:MAIN
 ...

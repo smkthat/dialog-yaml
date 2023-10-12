@@ -1,5 +1,5 @@
 from .func import (
-    FuncsRegistry, function_registry, notify_func, func_wrapper, on_click_wrapper,
+    FuncsRegistry, function_registry, notify_func,
     FuncModel, FuncField, NotifyModel, NotifyField
 )
 

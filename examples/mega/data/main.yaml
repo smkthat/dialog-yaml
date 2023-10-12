@@ -8,4 +8,5 @@ dialogs:
   Counters: !include counters.yaml
   Multiwidgets: !include multiwidgets.yaml
   Switch: !include switch.yaml
+  Callbacks: !include callbacks.yaml
 ...

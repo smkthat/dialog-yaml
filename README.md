@@ -1,12 +1,14 @@
 # dialog-yaml
 
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-green.svg)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/coverage-unknown-red.svg)](https://pypi.org/project/dialog-yaml/)
+[English](README.md) | [Русский](README.ru.md)
+
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-28A745?logo=pypi)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-F7DF1E?logo=opensourceinitiative)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/Coverage-84%25-4C1?logo=codecov)](https://pypi.org/project/dialog-yaml/)
 
 ---
 
 > ⚠️ **WARNING**: This library is experimental. The author is not responsible for any problems that may arise from its use.
 
-A Python library that enables building [aiogram-dialog](https://github.com/tishka17/aiogram_dialog) applications using YAML configuration files. This library simplifies the creation of Telegram bots with complex dialog flows by allowing developers to define dialogs, windows, and widgets declaratively in YAML format.
+A Python library that provides a declarative, YAML-based configuration layer for building [aiogram-dialog](https://github.com/tishka17/aiogram_dialog) applications. It acts as a wrapper, allowing developers to define complex dialog flows, windows, and widgets declaratively in YAML, thus simplifying development without replacing the need to understand the underlying aiogram-dialog library.
 
 ## 📖 Overview
 
@@ -14,46 +16,22 @@ The `dialog-yaml` library provides a `DialogYAMLBuilder` class that reads YAML c
 
 ## ✨ Features
 
-### 📝 Declarative Dialog Definition
-
-Define dialogs, windows, and widgets using YAML files
-
-### 🔧 Modular Structure
-
-Support for including separate YAML files using `!include` directive
-
-### 📌 YAML Anchors
-
-Support for YAML anchors (`&`) and references (`*`) to avoid duplication
-
-### 🎛️ Built-in Widgets
-
-Support for various aiogram-dialog widgets including:
-
-- Text elements
-- Keyboard widgets
-- Calendar widgets
-- Selection widgets
-- Scrolling widgets
-- Counter widgets
-- Media widgets
-- other...
-
-### ⚙️ Custom Functions
-
-Extensible function registry for custom business logic
-
-### 🧩 Custom Models
-
-Ability to register custom widget models
-
-### 🗂️ State Management
-
-Automatic generation and management of FSM states from YAML configuration
-
-### 🎚️ Flexible Configuration
-
-Support for custom states groups and models
+- **Declarative Dialog Definition**: Define dialogs, windows, and widgets using YAML files.
+- **Modular Structure**: Support for including separate YAML files using `!include` directive.
+- **YAML Anchors**: Support for YAML anchors (`&`) and references (`*`) to avoid duplication.
+- **Built-in Widgets**: Support for various `aiogram-dialog` widgets including:
+  - Text elements
+  - Keyboard widgets
+  - Calendar widgets
+  - Selection widgets
+  - Scrolling widgets
+  - Counter widgets
+  - Media widgets
+  - and more...
+- **Custom Functions**: Extensible function registry for custom business logic.
+- **Custom Models**: Ability to register custom widget models.
+- **State Management**: Automatic generation and management of FSM states from YAML configuration.
+- **Flexible Configuration**: Support for custom states groups and models.
 
 ## ⚙️ How It Works
 

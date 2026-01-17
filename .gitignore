@@ -279,6 +279,11 @@ ENV/
 env.bak/
 venv.bak/
 
+# Additional environment file patterns
+.env.*
+!.env.example
+!.env.template
+
 # Spyder project settings
 .spyderproject
 .spyproject

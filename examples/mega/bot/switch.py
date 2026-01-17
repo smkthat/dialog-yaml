@@ -5,9 +5,7 @@ from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.input import MessageInput
 
 
-async def data_getter(
-    dialog_manager: DialogManager, *_args, **_kwargs
-) -> dict[str, Any]:
+async def data_getter(dialog_manager: DialogManager, *_args, **_kwargs) -> dict[str, Any]:
     return {
         "name": dialog_manager.dialog_data.get("name", ""),
         "option": dialog_manager.find("chk").is_checked(),
@@ -15,9 +13,7 @@ async def data_getter(
     }
 
 
-async def set_name(
-    message: Message, message_input: MessageInput, manager: DialogManager
-):
+async def set_name(message: Message, message_input: MessageInput, manager: DialogManager):
     manager.dialog_data["name"] = message.text
     await manager.next()
 

@@ -11,8 +11,8 @@ from aiogram_dialog.widgets.kbd.calendar_kbd import (
 from aiogram_dialog.widgets.text import Text, Format
 from babel.dates import get_day_names, get_month_names
 
-from core.models.widgets.calendars import CalendarModel
-from core.utils import clean_empty
+from src.models.widgets.calendars import CalendarModel
+from src.utils import clean_empty
 
 
 class WeekDay(Text):
@@ -48,7 +48,6 @@ class CustomCalendar(Calendar):
         return {
             CalendarScope.DAYS: CalendarDaysView(
                 self._item_callback_data,
-                self.config,
                 header_text=Month(),
                 weekday_text=WeekDay(),
                 next_month_text=Month() + " 👉🏽",
@@ -56,7 +55,6 @@ class CustomCalendar(Calendar):
             ),
             CalendarScope.MONTHS: CalendarMonthView(
                 self._item_callback_data,
-                self.config,
                 month_text=Month(),
                 header_text=Format("{date:%Y}"),
                 this_month_text="[" + Month() + "]",
@@ -65,7 +63,6 @@ class CustomCalendar(Calendar):
             ),
             CalendarScope.YEARS: CalendarYearsView(
                 self._item_callback_data,
-                self.config,
                 year_text=Year(),
                 next_page_text=Year() + " 👉🏽",
                 prev_page_text="👈🏽 " + Year(),

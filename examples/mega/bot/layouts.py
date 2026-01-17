@@ -1,4 +1,4 @@
-from core import FuncsRegistry
+from src import FuncsRegistry
 
 
 def get_fruit_item(x):

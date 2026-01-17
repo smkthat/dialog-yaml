@@ -1,4 +1,4 @@
-from core import FuncsRegistry
+from src import FuncsRegistry
 
 
 def item_id_getter(x, *args, **kwargs):

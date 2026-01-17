@@ -4,15 +4,17 @@ version = "0.1.0"
 description = "A Python library that enables building aiogram-dialog applications using YAML configuration files"
 readme = "README.md"
 requires-python = ">=3.13"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
-    {name = "Mikhail Vlasenko"},
+    {name = "Mikhail Vlasenko", email = "ya@smkthat.ru"},
+]
+maintainers = [
+    {name = "Mikhail Vlasenko", email = "ya@smkthat.ru"},
 ]
 keywords = ["aiogram", "aiogram-dialog", "yaml", "telegram", "bot", "dialogs"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -27,6 +29,11 @@ dependencies = [
     "pyyaml>=6.0.3",
     "pyyaml-include>=2.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/smkthat/dialog-yaml"
+Repository = "https://github.com/smkthat/dialog-yaml"
+Issues = "https://github.com/smkthat/dialog-yaml/issues"
 
 [dependency-groups]
 dev = [
@@ -43,7 +50,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-# Scripts can be added here if needed
+# TODO: add scripts here
 
 [tool.ruff]
 target-version = "py313"

@@ -1,4 +1,4 @@
-.PHONY: help format check lint check-all test test-cov test-html mega-bot
+.PHONY: help format check lint check-all test test-cov test-html mega-bot build dist upload-pypi upload-testpypi clean
 
 # Detect OS
 UNAME_S := $(shell uname -s)
@@ -57,3 +57,28 @@ mega-bot: ## 🤖 Run mega bot example
 	@echo "🤖 Running mega bot example..."
 	@echo "💡 Make sure to set MEGA_BOT_TOKEN in .env file"
 	PYTHONPATH=. uv run examples/mega/bot.py
+
+build: ## 📦 Build package distributions
+	@echo "📦 Building package distributions..."
+	rm -rf dist/ build/ *.egg-info
+	uv run python -m build
+	@echo "✅ Package distributions built successfully!"
+	@echo "📦 Files created:"
+	@ls -la dist/
+
+dist: ## 📦 Show distribution files
+	@echo "📦 Distribution files:"
+	@ls -la dist/
+
+upload-pypi: ## 🚀 Upload package to PyPI
+	@echo "🚀 Uploading package to PyPI..."
+	uv run python -m twine upload dist/*
+
+upload-testpypi: ## 🧪 Upload package to TestPyPI
+	@echo "🧪 Uploading package to TestPyPI..."
+	uv run python -m twine upload --repository testpypi dist/*
+
+clean: ## 🧹 Clean build artifacts
+	@echo "🧹 Cleaning build artifacts..."
+	rm -rf dist/ build/ *.egg-info .coverage htmlcov/ .pytest_cache/ .ruff_cache/
+	@echo "✅ Build artifacts cleaned up!"

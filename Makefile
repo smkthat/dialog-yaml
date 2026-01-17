@@ -1,4 +1,4 @@
-.PHONY: help format check lint check-all test test-cov test-html
+.PHONY: help format check lint check-all test test-cov test-html mega-bot
 
 # Detect OS
 UNAME_S := $(shell uname -s)
@@ -52,3 +52,8 @@ test-html: ## 📊 Generating HTML test coverage report
 	uv run pytest -v --no-header --cov --cov-report=html
 	@echo
 	@echo "📄 See coverage report in htmlcov/index.html"
+
+mega-bot: ## 🤖 Run mega bot example
+	@echo "🤖 Running mega bot example..."
+	@echo "💡 Make sure to set MEGA_BOT_TOKEN in .env file"
+	PYTHONPATH=. uv run examples/mega/bot.py

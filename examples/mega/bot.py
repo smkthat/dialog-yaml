@@ -66,7 +66,7 @@ class CustomSG(StatesGroup):
 async def main():
     load_dotenv()
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=os.getenv("MEGA_BOT_LOG_LEVEL", logging.INFO),
         format="%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s",
     )
 

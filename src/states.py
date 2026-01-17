@@ -122,7 +122,7 @@ class YAMLStatesManager:
 
     @classmethod
     def _build_states(
-        cls, values: Iterable[str], group_name: str = None
+        cls, values: Iterable[str], group_name: str | None = None
     ) -> Dict[str, State]:
         """Builds a Dictionary of State objects based on the given values.
 
@@ -154,7 +154,7 @@ class YAMLStatesManager:
         return group_class()
 
     @classmethod
-    def extract_group_and_state_names(cls, raw_states_group: str) -> (str, str):
+    def extract_group_and_state_names(cls, raw_states_group: str) -> tuple[str, str]:
         """Extracts the group name and state name from
         the given raw states group string.
 
@@ -162,7 +162,7 @@ class YAMLStatesManager:
         :type raw_states_group: str
 
         :return: The group name and state name.
-        :rtype: (str, str)
+        :rtype: tuple[str, str]
 
         :raises DialogYamlException: If the raw states group is invalid.
         """
@@ -189,7 +189,8 @@ class YAMLStatesManager:
                 f"for {cls.DELIMITER!r} delimiter"
             )
 
-        return raw_states_group.split(cls.DELIMITER)
+        parts = raw_states_group.split(cls.DELIMITER)
+        return parts[0], parts[1]
 
     def parse_raw_states_from_list(
         self, raw_states_list: Set[str]
@@ -252,14 +253,17 @@ class YAMLStatesManager:
         :raises StatesGroupNotFoundError: If the states group is not found.
         """
 
-        state_name = self.format_state_name(group_name, state._state)
+        state_name = state._state
+        if state_name is None:
+            raise DialogYamlException("State name cannot be None")
+        full_state_name = self.format_state_name(group_name, state_name)
         states_group = self._states_groups_map_.get(group_name, None)
 
         if not states_group:
             raise StatesGroupNotFoundError(group_name)
 
         state.set_parent(states_group.__class__)
-        self._states_groups_map_[state_name] = state
+        self._states_groups_map_[full_state_name] = state
 
     def add_states_to_map(self, group_name: str, states: Dict[str, State]) -> None:
         """Adds states to the states groups map.
@@ -306,6 +310,22 @@ class YAMLStatesManager:
 
         return f"{group_name}{cls.DELIMITER}{state_name}"
 
+    def get_group_names(self) -> List[str]:
+        """Get all the group names from the states groups map.
+
+        :return: A list of group names
+        :rtype: List[str]
+        """
+        # Group names are the keys that don't contain the delimiter
+        group_names = []
+        for key in self._states_groups_map_.keys():
+            if self.DELIMITER not in key:
+                # Check if this key represents a StatesGroup (not a State)
+                item = self._states_groups_map_[key]
+                if isinstance(item, StatesGroup):
+                    group_names.append(key)
+        return group_names
+
     def include_states_group_by_class(self, custom_state_class: Type[StatesGroup]) -> None:
         """It creates an instance of the custom `StatesGroup` class,
         extracts the states from the instance, and adds them
@@ -329,11 +349,15 @@ class YAMLStatesManager:
         states_group = custom_state_class()
         self.add_states_group_to_map(group_name, states_group)
 
-        if states_group.__states__:
-            states = {
-                self.format_state_name(group_name, state._state): state
-                for state in states_group.__states__
-            }
-            self.add_states_to_map(group_name, states)
+        # Access states via __dict__ or iterate through the group attributes
+        states_attrs = {}
+        for attr_name in dir(states_group):
+            attr_value = getattr(states_group, attr_name)
+            if isinstance(attr_value, State):
+                states_attrs[attr_name] = attr_value
+
+        if states_attrs:
+            for state_name, state in states_attrs.items():
+                self.add_state_to_map(group_name, state)
         else:
             raise DialogYamlException(f"{group_name!r} must have at least one state.")

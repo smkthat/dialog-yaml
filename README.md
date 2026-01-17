@@ -118,12 +118,14 @@ uv pip install dialog-yaml
 
 ## 🧰 Requirements
 
-- Python >= 3.13
+- Python >= 3.13 (use a virtual environment)
 - aiogram >= 3.24.0
 - aiogram-dialog >= 2.4.0
 - pydantic >= 2.12.5
 - PyYAML >= 6.0.3
 - pyyaml-include >= 2.2
+
+Note: Do not commit .env files.
 
 ## 👤 Usage (for Users)
 
@@ -144,6 +146,19 @@ dy_builder = DialogYAMLBuilder.build(
 
 # Access the configured router
 router = dy_builder.router
+```
+
+### Accessing FSM states from the builder
+
+You can access dynamically generated states with dot-notation:
+
+```python
+builder = DialogYAMLBuilder.build(
+    yaml_file_name="main.yaml",
+    yaml_dir_path="...",
+)
+# Example: navigate to a state
+menu_main = builder.states.Menu.MAIN
 ```
 
 ### 📄 YAML Structure

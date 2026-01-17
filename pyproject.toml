@@ -56,9 +56,11 @@ build-backend = "setuptools.build_meta"
 target-version = "py313"
 line-length = 91
 
+[tool.setuptools]
+package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
+include = ["*"]
 
 [tool.coverage.run]
 omit = [

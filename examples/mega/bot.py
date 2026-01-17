@@ -25,7 +25,7 @@ async def start(_: Message, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data["dialog_yaml"]
     await dialog_manager.start(
-        state=dialog_yaml.states_manager.get_by_name("Menu:MAIN"),
+        state=dialog_yaml.states.Menu.MAIN,
         mode=StartMode.RESET_STACK,
     )
 
@@ -51,7 +51,7 @@ async def on_unknown_intent(event: ErrorEvent, dialog_manager: DialogManager):
     data = dialog_manager.middleware_data
     dialog_yaml: DialogYAMLBuilder = data["dialog_yaml"]
     await dialog_manager.start(
-        state=dialog_yaml.states_manager.get_by_name("Menu:MAIN"),
+        state=dialog_yaml.states.Menu.MAIN,
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.SEND,
     )
@@ -65,8 +65,10 @@ class CustomSG(StatesGroup):
 
 async def main():
     load_dotenv()
+    log_level_env = os.getenv("MEGA_BOT_LOG_LEVEL", "INFO").upper()
+    log_level = getattr(logging, log_level_env, logging.INFO)
     logging.basicConfig(
-        level=os.getenv("MEGA_BOT_LOG_LEVEL", logging.INFO),
+        level=log_level,
         format="%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s",
     )
 

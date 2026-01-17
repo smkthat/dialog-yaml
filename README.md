@@ -1,6 +1,6 @@
 # dialog-yaml
 
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-green.svg)](https://pypi.org/project/aiogram-dialog/) [![Coverage Status](https://img.shields.io/badge/coverage-unknown-red.svg)](https://pypi.org/project/dialog-yaml/)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-green.svg)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/coverage-unknown-red.svg)](https://pypi.org/project/dialog-yaml/)
 
 ---
 
@@ -55,6 +55,75 @@ Automatic generation and management of FSM states from YAML configuration
 
 Support for custom states groups and models
 
+## ⚙️ How It Works
+
+The library orchestrates the conversion from declarative YAML files to functional `aiogram-dialog` objects. Here's a look at the internal process and how the components interact.
+
+<details>
+<summary><b>Diagram 1: High-Level Data Flow</b></summary>
+
+This diagram shows the journey from a YAML file to a ready-to-use `aiogram` router.
+
+```mermaid
+graph TD
+    A["Start: `DialogYAMLBuilder.build()`"] --> B{"1. Read & Parse YAML"};
+    B -- Raw Data --> C{"2. Generate FSM States"};
+    B -- Raw Data --> D{"3. Create Pydantic Models"};
+    D -- Function Names --> E{"4. Link Registered Functions"};
+    C & E --> F{"5. Build `aiogram-dialog` Objects"};
+    F --> G{"6. Register Dialogs in Router"};
+    G --> H["End: Return Configured Router"];
+```
+
+</details>
+
+<details>
+<summary><b>Diagram 2: Component Interaction</b></summary>
+
+This diagram illustrates how the major internal components of `dialog-yaml` work together.
+
+```mermaid
+graph LR
+    subgraph `Your Python Code`
+        direction TB
+        App(Application)
+        Funcs(Custom Functions)
+    end
+
+    subgraph `dialog-yaml Library`
+        direction TB
+        Builder(DialogYAMLBuilder)
+        Reader(YAMLReader)
+        States(YAMLStatesManager)
+        Factory(YAMLModelFactory)
+        FuncReg(FuncsRegistry)
+    end
+
+    subgraph `Data & Objects`
+        direction TB
+        YAML(YAML files)
+        PydanticMs(Pydantic Models)
+        AD["aiogram-dialog Objects"]
+    end
+
+    App -- "invokes" --> Builder
+    Funcs -- "are registered in" --> FuncReg
+
+    Builder -- "uses" --> Reader
+    Builder -- "uses" --> States
+    Builder -- "uses" --> Factory
+
+    Reader -- "reads" --> YAML
+    
+    Factory -- "creates" --> PydanticMs
+    PydanticMs -- "reference" --> FuncReg
+
+    Builder -- "converts" --> PydanticMs
+    Builder -- "produces" --> AD
+```
+
+</details>
+
 ## 📦 Installation
 
 For installation use pip:
@@ -76,6 +145,7 @@ uv pip install dialog-yaml
 - aiogram-dialog >= 2.4.0
 - pydantic >= 2.12.5
 - PyYAML >= 6.0.3
+- pyyaml-include >= 2.2
 
 ## 👤 Usage (for Users)
 
@@ -118,107 +188,170 @@ dialogs:
 ...
 ```
 
-### ⚙️ Using Custom Functions
+### ⚙️ Custom Logic with Functions
 
-You can define custom functions in your Python code and reference them in YAML files. Here's how to register and use custom functions:
+While YAML is great for defining the UI structure, you'll need Python functions for business logic. `dialog-yaml` allows you to link Python functions to your widgets for two main purposes: **Event Handlers** and **Data Getters**.
 
-**Python code:**
+First, you need a place to register your functions.
 
 ```python
-from aiogram import Router
-from aiogram_dialog import DialogManager
-from dialog_yaml import DialogYAMLBuilder, FuncsRegistry
+# funcs.py
+from dialog_yaml import FuncsRegistry
 
-# Define your custom function
-async def my_custom_function(dialog_manager: DialogManager, callback_data: str):
-    # Your custom logic here
-    print(f"Callback data: {callback_data}")
-    # You can access dialog data via dialog_manager
-    await dialog_manager.show()
-
-# Create a function registry and register your function
+# Create a global registry
 funcs_registry = FuncsRegistry()
-funcs_registry.register("my_function", my_custom_function)
 
-# Build the dialog with custom functions
+# Now, add functions to this registry (see examples below)
+```
+
+`dialog-yaml` uses a global singleton for the registry. You don't need to pass it during the build process. The most important thing is to **ensure the Python module where you define and register your functions is imported** before the bot starts running.
+
+```python
+# main.py - Your application's entry point
+from aiogram import Router
+from dialog_yaml import DialogYAMLBuilder
+
+# Import the module where you defined `funcs_registry` and registered functions.
+# This ensures the functions are added to the global registry.
+import my_project.dialogs.funcs 
+
+# ... setup bot and dispatcher ...
+
+# Now build the dialogs. The builder will automatically find the registered functions.
 dy_builder = DialogYAMLBuilder.build(
     yaml_file_name="main.yaml",
     yaml_dir_path="path/to/yaml/files",
-    router=Router(),
+    router=router,
 )
 ```
 
-**YAML file:**
+#### Event Handlers
 
-```yaml
----
-dialogs:
-  Menu:
-    windows:
-      MAIN:
-        widgets:
-          - text: "Welcome to our bot!"
-          - button:
-              text: "Click me"
-              id: click_btn
-              on_click: my_function  # This refers to the function registered in Python
-...
-```
+Event handlers are functions that respond to user actions, such as clicking a button or selecting an item. You can assign them to fields like `on_click`, `on_selected`, `on_process_result`, etc.
 
-### 📥 Using Custom Functions with Parameters
-
-You can also pass parameters to your custom functions:
+The key thing to remember is that the **function signature must match what `aiogram-dialog` expects** for that specific handler. `dialog-yaml` simply passes your function along.
 
 **Python code:**
 
 ```python
-async def greet_user(dialog_manager: DialogManager, callback_data: str):
-    # Extract data from callback_data if needed
-    user_id = dialog_manager.event.from_user.id
-    await dialog_manager.show()  # Refresh the dialog
+# funcs.py
+from aiogram.types import CallbackQuery
+from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.kbd import Button
 
-async def navigate_to_settings(dialog_manager: DialogManager, callback_data: str):
-    # Navigate to a different state
-    await dialog_manager.switch_to(State.SETTINGS)
+# Correct signature for a Button's on_click event
+async def on_button_click(
+    callback: CallbackQuery,
+    widget: Button,
+    manager: DialogManager,
+):
+    print(f"Button '{widget.widget_id}' was clicked!")
+    await manager.next()
 
-# Register the functions
-funcs_registry = FuncsRegistry()
-funcs_registry.register("greet_user", greet_user)
-funcs_registry.register("go_to_settings", navigate_to_settings)
+funcs_registry.register(on_button_click)
 ```
 
 **YAML file:**
 
 ```yaml
----
-dialogs:
-  Menu:
-    windows:
-      MAIN:
-        widgets:
-          - text: "Main Menu"
-          - button:
-              text: "Greet Me"
-              id: greet_btn
-              on_click: greet_user
-          - start:
-              text: "Settings"
-              id: settings_btn
-              state: Menu:SETTINGS
-              on_click: go_to_settings
-...
+# ...
+- button:
+    text: "Click me"
+    id: click_btn
+    on_click: on_button_click # Function name
 ```
 
-### 🔄 How Custom Functions Are Interpreted
+> 💡 **Tip**: To find the correct signature for a handler, refer to the official [aiogram-dialog documentation](https://aiogram-dialog.readthedocs.io/en/latest/).
 
-When the dialog-yaml library processes your YAML files:
+#### Data Getters
 
-1. It scans for properties like `on_click`, `on_process_result`, `on_selected`, etc., that contain function names
-2. It looks up these function names in the internal function registry
-3. When the corresponding widget event occurs, it calls the registered Python function
-4. The function receives the `dialog_manager` object and `callback_data` as parameters
+Data getters are functions that supply dynamic data to your widgets, such as text for a `Format` widget or a list of items for a `Select` widget. You can assign them to fields like `text`, `items`, `when`, etc.
 
-This allows you to implement complex business logic in Python while keeping the UI structure in YAML files.
+These functions are typically called with `(DialogManager, **kwargs)` and should return the data in the format expected by the widget.
+
+**Python code:**
+
+```python
+# funcs.py
+from aiogram_dialog import DialogManager
+
+async def get_user_name(manager: DialogManager, **kwargs):
+    # You can get data from the dialog_manager
+    return {"user_name": manager.event.from_user.full_name}
+
+async def get_products_for_select(**kwargs):
+    return [
+        ("Apples", "fruit_apple"),
+        ("Oranges", "fruit_orange"),
+        ("Steak", "meat_steak"),
+    ]
+
+funcs_registry.register(get_user_name)
+funcs_registry.register(get_products_for_select)
+```
+
+**YAML file:**
+
+```yaml
+# ...
+- text:
+    text: "Hello, {user_name}!"
+    data: get_user_name # This getter provides the data for formatting
+# ...
+- select:
+    id: products
+    items: get_products_for_select # This getter provides the list of items
+    item_id_getter: 1 # Use the second element of the tuple as item_id
+    on_selected: on_product_selected
+```
+
+#### Passing Static Data from YAML
+
+You can also pass static data from your YAML file directly to your Python function. This is useful for making functions reusable.
+
+To do this, define the function reference as an object in YAML, with `name` being the function name and other keys being your static data.
+
+**Python code:**
+
+```python
+# funcs.py
+from aiogram.types import CallbackQuery
+from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.kbd import Button
+
+# This function will receive the extra data in its `data` parameter
+async def on_navigate(
+    callback: CallbackQuery,
+    widget: Button,
+    manager: DialogManager,
+    data: dict,
+):
+    target_state = data.get("target_state")
+    if target_state:
+        # You need to resolve the state string to a State object here
+        # (This is a simplified example)
+        await manager.start(target_state)
+
+funcs_registry.register(on_navigate)
+```
+
+**YAML file:**
+
+```yaml
+# ...
+- button:
+    text: "Go to Profile"
+    id: go_profile
+    on_click:
+      name: on_navigate
+      target_state: "UserProfile:main" # Static data passed to the function
+- button:
+    text: "Go to Settings"
+    id: go_settings
+    on_click:
+      name: on_navigate
+      target_state: "Settings:main" # Same function, different data
+```
 
 ### 📌 Using YAML Anchors
 

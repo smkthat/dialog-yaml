@@ -1,4 +1,4 @@
-from core import FuncsRegistry
+from src import FuncsRegistry
 from .layouts import register_layouts
 from .scrolls import register_scrolls
 from .selects import register_selects

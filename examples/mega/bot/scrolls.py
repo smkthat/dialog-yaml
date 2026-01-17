@@ -2,7 +2,7 @@ import calendar
 
 from aiogram_dialog import DialogManager
 
-from core import FuncsRegistry
+from src import FuncsRegistry
 
 
 async def product_getter(**_kwargs):

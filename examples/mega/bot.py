@@ -1,8 +1,9 @@
 import asyncio
 import logging
+import os
 from contextlib import suppress
 
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter
@@ -13,7 +14,7 @@ from aiogram.types import Message, ErrorEvent
 from aiogram_dialog import DialogManager, StartMode, ShowMode
 from aiogram_dialog.api.exceptions import UnknownIntent
 
-from core import DialogYAMLBuilder, FuncsRegistry
+from src import DialogYAMLBuilder, FuncsRegistry
 from examples.mega.bot import register_dialog_yaml_funcs
 from examples.mega.bot.custom import CustomCalendarModel
 
@@ -34,8 +35,7 @@ async def on_unknown_intent(event: ErrorEvent, dialog_manager: DialogManager):
     logging.error("Restarting dialog: %s", event.exception)
     if event.update.callback_query:
         await event.update.callback_query.answer(
-            "Bot process was restarted due to maintenance.\n"
-            "Redirecting to main menu.",
+            "Bot process was restarted due to maintenance.\nRedirecting to main menu.",
         )
         try:
             await event.update.callback_query.message.delete()
@@ -65,12 +65,15 @@ class CustomSG(StatesGroup):
 
 async def main():
     load_dotenv()
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s",
+    )
 
     register_dialog_yaml_funcs(FuncsRegistry())
     dy_builder = DialogYAMLBuilder.build(
         yaml_file_name="main.yaml",
-        yaml_dir_path="data",
+        yaml_dir_path="examples/mega/data",
         models={"my_calendar": CustomCalendarModel},
         states=[CustomSG],
         router=Router(),
@@ -84,7 +87,7 @@ async def main():
 
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(dy_builder.router)
-    bot = Bot(token=dotenv_values()["MEGA_BOT_TOKEN"])
+    bot = Bot(token=os.getenv("MEGA_BOT_TOKEN", ""))
     await bot.get_updates(offset=-1)
     await dp.start_polling(bot)
 

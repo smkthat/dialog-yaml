@@ -4,7 +4,7 @@ from typing import Any
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 
-from core import FuncsRegistry
+from src import FuncsRegistry
 
 
 @dataclass

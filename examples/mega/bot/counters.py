@@ -2,7 +2,7 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import ManagedCounter
 
-from core import FuncsRegistry
+from src import FuncsRegistry
 
 
 async def counter_getter(dialog_manager: DialogManager, **kwargs):

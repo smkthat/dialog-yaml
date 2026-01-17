@@ -34,9 +34,7 @@ async def on_click_with_data(
     dialog_manager: DialogManager,
     data: Dict,
 ):
-    await callback.message.answer(
-        json.dumps(data, indent=4, ensure_ascii=False)
-    )
+    await callback.message.answer(json.dumps(data, indent=4, ensure_ascii=False))
 
 
 def register_notifies(registry):

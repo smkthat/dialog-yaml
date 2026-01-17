@@ -1,5 +1,6 @@
 import logging
 import os
+import types
 from typing import Type, List, Dict, Any
 
 from aiogram import Router
@@ -55,6 +56,20 @@ class DialogYAMLBuilder:
     @property
     def router(self) -> Router:
         return self._router
+
+    @property
+    def states(self) -> types.SimpleNamespace:
+        """Provides convenient dot-notation access to dynamically generated FSM states.
+        Allows accessing states like `builder.states.Menu.MAIN` instead of
+        `builder.states_manager.get_by_name("Menu").MAIN`.
+
+        :return: The states.
+        :rtype: types.SimpleNamespace
+        """
+        groups = {}
+        for group_name in self.states_manager.get_group_names():
+            groups[group_name] = self.states_manager.get_by_name(group_name)
+        return types.SimpleNamespace(**groups)
 
     @classmethod
     def build(

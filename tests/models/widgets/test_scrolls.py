@@ -63,9 +63,7 @@ class TestScroll(TestWidgetBase):
             ({"last_page": "scroll_no_pager"}, LastPageModel, SwitchPage),
         ],
     )
-    def test_scroll(
-        self, input_data: dict, expected_model_cls, expected_widget_cls
-    ):
+    def test_scroll(self, input_data: dict, expected_model_cls, expected_widget_cls):
         widget_model = self.yaml_model.create_model(input_data)
         assert isinstance(widget_model, expected_model_cls)
 

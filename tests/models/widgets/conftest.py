@@ -36,9 +36,7 @@ def get_test_getter():
 
 
 @pytest.fixture
-def func_registry(
-    get_test_func, get_test_notify, get_test_getter
-) -> FuncsRegistry:
+def func_registry(get_test_func, get_test_notify, get_test_getter) -> FuncsRegistry:
     registry = FuncsRegistry()
     registry.clear_categories()
     registry.func.register(get_test_func)

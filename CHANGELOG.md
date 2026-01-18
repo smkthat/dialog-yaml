@@ -7,19 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] - 2026-01-18
 
+### Added
+
+- New example YAML datasets materials/data_examples/ (menus, layouts, scrolls, selects, calendars, counters, multiwidgets, callbacks).
+- Comprehensive test suite with unit, integration, and functional tests covering core components, achieving 91% code coverage.
+
 ### Changed
 
-- Project renamed from dialog-yaml to dialog-yml
-- Source code moved from src/ to src/dialog_yml/
-- All imports changed from dialog_yaml to dialog_yml
-- Examples moved to external repository (dialog-yml-examples)
-- Test data extensions changed from .yaml to .yml
-- Updated documentation to reflect new naming
-- Updated Makefile to work with new examples location
-- Package name changed in pyproject.toml and setup.cfg
-- Middleware parameter renamed from dialog_yaml to dialog_yml
-- Various internal imports updated to reflect new package structure
-- Removed .env.dev file
+- Project restructured: renamed from dialog-yaml to dialog-yml, source code moved to src/dialog_yml/, all imports updated, package name changed in configuration files, middleware parameter renamed, and internal imports adjusted to reflect new package structure.
+- Examples relocated to external repository (dialog-yml-examples).
+- Test data file extensions standardized from .yaml to .yml.
+- Documentation updated to reflect project renaming with README badges showing 91% coverage.
+- Build system: Makefile updated with separate test targets, fail-fast options, PYTEST_ADDOPTS support, and coverage restricted to src directory; pyproject.toml classifiers updated to include OS Independent.
+- Core functionality: DialogYAMLBuilder now stores empty dir path by default and uses internal fields in _build(); YAML reader supports both .yaml and .yml resolution with fallback; input widget defaults content_types to ANY when unspecified; NotifyModel migrated to pydantic v2 StringConstraints.
+- Path handling improved: replaced all os.path.join calls with pathlib.Path for better readability and robustness.
+- Dependencies: Updated aiogram-dialog version constraint from ~=2.4.0 to ~=2.4 to align with tested matrix.
+- Development environment: VSCode settings configured for unittest integration; MessageInputModel.validate_content_types now raises validation errors instead of silently defaulting to ANY, improving error detection.
+
+### Removed
+
+- Legacy flat test files replaced by reorganized test suites.
+- Development environment file (.env.dev) removed.
+
+### Internal
+
+- Test adjustments implemented for functions and widgets to match new behaviors and structure.
 
 ## [0.1.1] - 2026-01-18
 

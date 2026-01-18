@@ -1,4 +1,4 @@
-.PHONY: help format check lint check-all test test-cov test-html mega-bot build dist upload-pypi upload-testpypi clean
+.PHONY: help format check lint check-all test test-unit test-integration test-functional test-cov test-html mega-bot build dist upload-pypi upload-testpypi clean
 
 # Detect OS
 UNAME_S := $(shell uname -s)
@@ -11,7 +11,7 @@ NC = \033[0m # No Color
 
 CWD := $(shell pwd)
 MAIN_MODULE = src
-CHECK_SRC = src
+CHECK_SRC = src tests
 
 help: # 💡 Show this help message
 	@echo "$(GREEN)spoetka-base$(NC)"
@@ -39,29 +39,31 @@ check-all: format check lint ## 🧠 Run format & all code quality checks
 	@echo "✅ Code quality checks passed!"
 	@echo
 
-test: ## 🧪 Run tests
-	@echo "🧪 Running tests..."
-	uv run pytest -v --no-header
+test: ## 🧪 Run all tests
+	@echo "🧪 Running all tests..."
+	uv run pytest -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-unit: ## 🧪 Run unit tests
+	@echo "🧪 Running unit tests..."
+	uv run pytest tests/unit -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-integration: ## 🧪 Run integration tests
+	@echo "🧪 Running integration tests..."
+	uv run pytest tests/integration -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-functional: ## 🧪 Run functional tests
+	@echo "🧪 Running functional tests..."
+	uv run pytest tests/functional -v --no-header -x $(PYTEST_ADDOPTS)
 
 test-cov: ## 📊 Generating test coverage report
 	@echo "📊 Generating test coverage report..."
-	uv run pytest -v --no-header --cov
+	uv run pytest -v --no-header --cov=src $(PYTEST_ADDOPTS)
 
 test-html: ## 📊 Generating HTML test coverage report
 	@echo "📊 Generating HTML test coverage report..."
-	uv run pytest -v --no-header --cov --cov-report=html
+	uv run pytest -v --no-header --cov=src --cov-report=html $(PYTEST_ADDOPTS)
 	@echo
 	@echo "📄 See coverage report in htmlcov/index.html"
-
-mega-bot: ## 🤖 Run mega bot example (requires cloning examples repo)
-	@echo "🤖 Running mega bot example..."
-	@if [ ! -d "dialog-yml-examples" ]; then \
-		echo "⚠️  Warning: dialog-yml-examples directory not found"; \
-		echo "Please clone the examples repository first:"; \
-		echo "git clone https://github.com/smkthat/dialog-yml-examples.git"; \
-		exit 1; \
-	fi
-	cd dialog-yml-examples/mega && PYTHONPATH=. uv run bot.py
 
 build: clean ## 📦 Build package distributions
 	@echo "📦 Building package distributions..."

@@ -118,9 +118,7 @@ class TestFuncRegistry:
         with pytest.raises(CategoryNotFoundError):
             registry.get_category("nonexistent_category")
 
-    def test_register_function_in_notify_category(
-        self, registry, get_test_func
-    ):
+    def test_register_function_in_notify_category(self, registry, get_test_func):
         # Given
         function = get_test_func
 
@@ -129,8 +127,7 @@ class TestFuncRegistry:
 
         # Then
         assert (
-            registry.get_function(function.__name__, CategoryName.notify.value)
-            == function
+            registry.get_function(function.__name__, CategoryName.notify.value) == function
         )
 
     def test_retrieve_function_from_notify_category(self, registry):

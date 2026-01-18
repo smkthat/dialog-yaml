@@ -27,7 +27,7 @@ class MessageInputModel(WidgetModel):
     @field_validator("content_types", mode="before")
     def validate_content_types(cls, value):
         if not value:
-            return None
+            return [ContentType.ANY]
 
         if isinstance(value, str):
             value = [value]
@@ -38,9 +38,12 @@ class MessageInputModel(WidgetModel):
                 if isinstance(v, ContentType):
                     result.append(v)
                 elif isinstance(v, str):
-                    result.append(ContentType[v.upper()])
+                    try:
+                        result.append(ContentType[v.upper()])
+                    except KeyError:
+                        raise ValueError(f"Invalid content type: {v}")
                 else:
-                    return None
+                    raise ValueError(f"Invalid content type value: {v}")
 
         return result
 

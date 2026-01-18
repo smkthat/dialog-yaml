@@ -2,7 +2,7 @@
 
 [English](README.md) | [Русский](README.ru.md)
 
-[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-28A745?logo=pypi)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-F7DF1E?logo=opensourceinitiative)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/Coverage-84%25-4C1?logo=codecov)](https://pypi.org/project/dialog-yml/)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-28A745?logo=pypi)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-F7DF1E?logo=opensourceinitiative)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/Coverage-91%25-4C1?logo=codecov)](https://pypi.org/project/dialog-yml/)
 
 ---
 

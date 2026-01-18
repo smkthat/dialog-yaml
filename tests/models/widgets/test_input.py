@@ -26,9 +26,7 @@ class TestInput(TestWidgetBase):
             ),
         ],
     )
-    def test_input(
-        self, input_data: dict, expected_model_cls, expected_widget_cls
-    ):
+    def test_input(self, input_data: dict, expected_model_cls, expected_widget_cls):
         widget_model = self.yaml_model.create_model(input_data)
         assert isinstance(widget_model, expected_model_cls)
 

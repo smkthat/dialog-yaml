@@ -13,11 +13,11 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.kbd import Button
 from pydantic import (
-    constr,
     model_validator,
     BeforeValidator,
     ConfigDict,
     BaseModel,
+    StringConstraints,
 )
 
 from dialog_yml.decorators import singleton
@@ -254,7 +254,10 @@ FuncField = Annotated[FuncModel, BeforeValidator(FuncModel.to_model)]
 class NotifyModel(FuncModel):
     category_name: str = CategoryName.notify.value
     name: str = "notify_func"
-    text: constr(strip_whitespace=True, min_length=1, max_length=200)
+    text: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=200),
+    ]
     show_alert: bool = False
     delay: Union[int, None] = None
 

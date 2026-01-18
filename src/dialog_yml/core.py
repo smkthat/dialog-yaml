@@ -1,6 +1,6 @@
 import logging
-import os
 import types
+from pathlib import Path
 from typing import Type, List, Dict, Any
 
 from aiogram import Router
@@ -45,7 +45,7 @@ class DialogYAMLBuilder:
         logger.debug("Initialize DialogYAMLBuilder")
 
         self.yaml_file_name = yaml_file_name
-        self.yaml_dir_path = yaml_dir_path
+        self.yaml_dir_path = yaml_dir_path or ""
         self._router = router
 
         self.funcs_registry = FuncsRegistry()
@@ -109,7 +109,7 @@ class DialogYAMLBuilder:
         dialog_builder.register_custom_models(models)
         dialog_builder.register_custom_states(states)
 
-        dialogs = dialog_builder._build(yaml_file_name, yaml_dir_path)
+        dialogs = dialog_builder._build()
         dialog_builder._dialogs = dialogs
         router.include_routers(*dialogs)
 
@@ -162,13 +162,8 @@ class DialogYAMLBuilder:
         for custom_state in custom_states:
             self.states_manager.include_states_group_by_class(custom_state)
 
-    def _build(self, file_name: str, dir_path: str = "") -> List[Dialog]:
+    def _build(self) -> List[Dialog]:
         """Builds the Dialog instance from the YAML file.
-
-        :param file_name: The name of the YAML file.
-        :type file_name: str
-        :param dir_path: The path to the directory containing the YAML file.
-        :type dir_path: str (optional, default: None)
 
         :return: The dialogs.
         :rtype: List[Dialog]
@@ -176,9 +171,9 @@ class DialogYAMLBuilder:
 
         logger.debug("Build dialogs")
         data = YAMLReader.read_data_to_dict(
-            data_file_path=file_name, data_dir_path=dir_path
+            data_file_path=self.yaml_file_name, data_dir_path=self.yaml_dir_path
         )
-        data_file_path = os.path.join(dir_path, file_name)
+        data_file_path = str(Path(self.yaml_dir_path) / self.yaml_file_name)
 
         if not data:
             raise DialogYamlException(f"YAML data file {data_file_path!r} not provided!")
@@ -266,15 +261,32 @@ class DialogYAMLBuilder:
         :rtype: Dict[str, Dict]
         """
 
-        if cls.check_tag_data("dialogs", input_data, data_type=Dict):
-            dialogs_data = input_data["dialogs"]
+        dialogs_data = cls.check_tag_data("dialogs", input_data, data_type=Dict)
 
-            for group_name, dialog_data in dialogs_data.items():
-                if cls.check_tag_data("windows", dialog_data, data_type=Dict):
-                    windows_data = dialog_data["windows"]
+        # Check that there's at least one dialog group
+        if not dialogs_data:
+            raise InvalidTagName("dialogs", "Dialogs must contain at least one group.")
 
-                    for state_name, window_data in windows_data.items():
-                        cls.check_tag_data("widgets", window_data, data_type=List)
+        total_windows_count = 0
+
+        for group_name, dialog_data in dialogs_data.items():
+            windows_data = cls.check_tag_data("windows", dialog_data, data_type=Dict)
+
+            # Check that each dialog group has at least one window
+            if not windows_data:
+                raise InvalidTagName(
+                    "windows",
+                    f"Dialog group '{group_name}' must contain at least one window.",
+                )
+
+            for state_name, window_data in windows_data.items():
+                # Check that each window contains widgets list
+                cls.check_tag_data("widgets", window_data, data_type=List)
+                total_windows_count += 1
+
+        # If we didn't find any windows, raise an exception
+        if total_windows_count == 0:
+            raise InvalidTagName("windows", "At least one window must be defined.")
 
         return True
 
@@ -305,7 +317,7 @@ class DialogYAMLBuilder:
 
         result_data = data.get(tag, None)
 
-        if not result_data:
+        if result_data is None:
             raise InvalidTagName(tag, "Tag {tag} does not found in data.")
 
         if not isinstance(result_data, data_type):

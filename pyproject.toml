@@ -32,9 +32,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/smkthat/dialog-yaml"
-Repository = "https://github.com/smkthat/dialog-yaml"
-Issues = "https://github.com/smkthat/dialog-yaml/issues"
+Homepage = "https://github.com/smkthat/dialog-yml"
+Repository = "https://github.com/smkthat/dialog-yml"
+Issues = "https://github.com/smkthat/dialog-yml/issues"
 
 [dependency-groups]
 dev = [

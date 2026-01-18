@@ -2,10 +2,10 @@ from typing import Union, Callable, Awaitable
 
 import pytest
 
-from src.core import models_classes
-from src.models import YAMLModelFactory
-from src.models.funcs.func import FuncsRegistry
-from src.states import YAMLStatesManager
+from dialog_yml import FuncsRegistry
+from dialog_yml.core import models_classes
+from dialog_yml.models import YAMLModelFactory
+from dialog_yml.states import YAMLStatesManager
 
 
 @pytest.fixture

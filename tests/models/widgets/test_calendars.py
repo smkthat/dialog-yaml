@@ -1,7 +1,7 @@
 import pytest
 from aiogram_dialog.widgets.kbd import Calendar
 
-from src.models.widgets.calendars import CalendarModel
+from dialog_yml.models.widgets.calendars import CalendarModel
 from tests.models.widgets.conftest import TestWidgetBase
 
 

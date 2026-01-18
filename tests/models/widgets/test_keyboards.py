@@ -11,7 +11,7 @@ from aiogram_dialog.widgets.kbd import (
     ScrollingGroup,
 )
 
-from src.models.widgets.kbd.keyboard import (
+from dialog_yml.models.widgets.kbd.keyboard import (
     UrlButtonModel,
     CallbackButtonModel,
     SwitchToModel,
@@ -182,3 +182,21 @@ class TestKeyboard(TestWidgetBase):
 
         widget_obj = widget_model.to_object()
         assert isinstance(widget_obj, expected_widget_cls)
+
+    def test_group_keyboard_with_buttons_getter(self):
+        # Given
+        def buttons_getter():
+            return [{"next": "Next"}, {"back": "Back"}]
+
+        self.func_registry.func.register(buttons_getter)
+
+        input_data = {"group": {"buttons": "buttons_getter"}}
+        widget_model = self.yaml_model.create_model(input_data)
+        assert isinstance(widget_model, GroupKeyboardModel)
+
+        # When
+        widget_obj = widget_model.to_object()
+
+        # Then
+        assert isinstance(widget_obj, Group)
+        assert len(widget_obj.buttons) == 2

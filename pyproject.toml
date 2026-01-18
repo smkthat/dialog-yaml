@@ -1,6 +1,6 @@
 [project]
-name = "dialog-yaml"
-version = "0.1.1"
+name = "dialog-yml"
+version = "0.1.2"
 description = "A Python library that enables building aiogram-dialog applications using YAML configuration files"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -19,10 +19,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: AsyncIO",
+    "Operating System :: OS Independent",
 ]
 dependencies = [
     "aiogram>=3.24.0",
-    "aiogram-dialog~=2.4.0",
+    "aiogram-dialog~=2.4",
     "babel>=2.17.0",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
@@ -52,15 +53,16 @@ build-backend = "setuptools.build_meta"
 [project.scripts]
 # TODO: add scripts here
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["dialog_yml*"]
+
 [tool.ruff]
 target-version = "py313"
 line-length = 91
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["*"]
 
 [tool.coverage.run]
 omit = [

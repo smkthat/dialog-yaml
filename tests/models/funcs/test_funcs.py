@@ -2,12 +2,12 @@ from typing import Union, Callable, Awaitable
 
 import pytest
 
-from src.exceptions import (
+from dialog_yml import FuncsRegistry
+from dialog_yml.exceptions import (
     FunctionNotFoundError,
-    DialogYamlException,
     CategoryNotFoundError,
 )
-from src.models.funcs.func import CategoryName, FuncModel, FuncsRegistry
+from dialog_yml.models.funcs.func import CategoryName, FuncModel
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ class TestFuncModel:
         assert func_model.name == name
         assert func_model.category_name == category_name
 
-    def test_create_instance_with_valid_name_and_default_category_name(self):
+    def test_create_instance_with_valid_name_and_default_category_name(self, registry):
         # Given
         name = "test_func"
 
@@ -49,7 +49,7 @@ class TestFuncModel:
         assert func_model.name == name
         assert func_model.category_name == CategoryName.func.value
 
-    def test_call_to_model_method_with_valid_data(self):
+    def test_call_to_model_method_with_valid_data(self, registry):
         # Given
         data = {"name": "test_func", "category_name": CategoryName.func.value}
 
@@ -61,9 +61,7 @@ class TestFuncModel:
         assert func_model.name == data["name"]
         assert func_model.category_name == data["category_name"]
 
-    def test_call_func_property_with_valid_function_name_and_category_name(
-        self,
-    ):
+    def test_call_func_property_with_valid_function_name_and_category_name(self, registry):
         # Given
         name = "test_func"
         category_name = CategoryName.func.value
@@ -99,7 +97,7 @@ class TestFuncModel:
         data = {"name": "", "category_name": CategoryName.func.value}
 
         # When/Then
-        with pytest.raises(DialogYamlException):
+        with pytest.raises(FunctionNotFoundError):
             FuncModel.to_model(data)
 
     def test_call_check_func_method_with_invalid_function(self):
@@ -111,7 +109,7 @@ class TestFuncModel:
         with pytest.raises(FunctionNotFoundError):
             FuncModel(name=name, category_name=category_name)
 
-    def test_to_model_with_string_data(self):
+    def test_to_model_with_string_data(self, registry):
         # Given
         data = "test_func"
 
@@ -124,7 +122,7 @@ class TestFuncModel:
         assert model.category_name == CategoryName.func.value
         assert model.data == {}
 
-    def test_to_model_with_dict_data(self):
+    def test_to_model_with_dict_data(self, registry):
         # Given
         data = {
             "name": "test_func",

@@ -1,7 +1,7 @@
 import pytest
 from aiogram_dialog.widgets.input import MessageInput
 
-from src.models.widgets.inputs import MessageInputModel
+from dialog_yml.models.widgets.inputs import MessageInputModel
 from tests.models.widgets.conftest import TestWidgetBase
 
 

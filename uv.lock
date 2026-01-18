@@ -247,8 +247,8 @@ wheels = [
 ]
 
 [[package]]
-name = "dialog-yaml"
-version = "0.1.1"
+name = "dialog-yml"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiogram" },

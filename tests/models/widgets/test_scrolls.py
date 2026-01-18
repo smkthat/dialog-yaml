@@ -2,7 +2,7 @@ import pytest
 from aiogram_dialog.widgets.kbd import StubScroll, NumberedPager, SwitchPage
 from aiogram_dialog.widgets.text import ScrollingText
 
-from src.models.widgets.scrolls.scroll import (
+from dialog_yml.models.widgets.scrolls.scroll import (
     ScrollingTextModel,
     StubScrollModel,
     NumberedPagerModel,

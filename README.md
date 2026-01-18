@@ -1,8 +1,8 @@
-# dialog-yaml
+# dialog-yml
 
 [English](README.md) | [Русский](README.ru.md)
 
-[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-28A745?logo=pypi)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-F7DF1E?logo=opensourceinitiative)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/Coverage-84%25-4C1?logo=codecov)](https://pypi.org/project/dialog-yaml/)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/downloads/) [![aiogram-dialog 2.4.0](https://img.shields.io/badge/aiogram--dialog-2.4.0-28A745?logo=pypi)](https://pypi.org/project/aiogram-dialog/) [![MIT License](https://img.shields.io/badge/License-MIT-F7DF1E?logo=opensourceinitiative)](https://opensource.org/licenses/MIT) [![Coverage Status](https://img.shields.io/badge/Coverage-91%25-4C1?logo=codecov)](https://pypi.org/project/dialog-yml/)
 
 ---
 
@@ -68,7 +68,7 @@ graph LR
         Funcs(Custom Functions)
     end
 
-    subgraph `dialog-yaml Library`
+    subgraph `dialog-yml Library`
         direction TB
         Builder(DialogYAMLBuilder)
         Reader(YAMLReader)
@@ -107,13 +107,13 @@ graph LR
 For installation use pip:
 
 ```bash
-pip install dialog-yaml
+pip install dialog-yml
 ```
 
 Or if you use uv (recommended):
 
 ```bash
-uv pip install dialog-yaml
+uv pip install dialog-yml
 ```
 
 ## 🧰 Requirements
@@ -135,7 +135,7 @@ Here's a basic example of how to use the library:
 
 ```python
 from aiogram import Router
-from dialog_yaml import DialogYAMLBuilder
+from dialog_yml import DialogYAMLBuilder
 
 # Build the dialog from a YAML file
 dy_builder = DialogYAMLBuilder.build(
@@ -189,7 +189,7 @@ First, you need a place to register your functions.
 
 ```python
 # funcs.py
-from dialog_yaml import FuncsRegistry
+from dialog_yml import FuncsRegistry
 
 # Create a global registry
 funcs_registry = FuncsRegistry()
@@ -202,7 +202,7 @@ funcs_registry = FuncsRegistry()
 ```python
 # main.py - Your application's entry point
 from aiogram import Router
-from dialog_yaml import DialogYAMLBuilder
+from dialog_yml import DialogYAMLBuilder
 
 # Import the module where you defined `funcs_registry` and registered functions.
 # This ensures the functions are added to the global registry.
@@ -455,7 +455,7 @@ The library follows a modular structure:
 
 ## 📚 Examples
 
-See the [examples/mega](examples/mega/) directory for a comprehensive example that demonstrates:
+See the [dialog-yml-examples](https://github.com/smkthat/dialog-yml-examples) repository for a comprehensive example that demonstrates:
 
 - Multiple dialog groups
 - Different widget types
@@ -468,7 +468,7 @@ To run the example:
 
 1. Create a `.env` file with your bot token and log level:
 
-   ```
+   ```env
    MEGA_BOT_TOKEN=your_telegram_bot_token
    MEGA_BOT_LOG_LEVEL=INFO
    ```
@@ -477,10 +477,10 @@ To run the example:
 
    ```bash
    # If using uv (recommended)
-   PYTHONPATH=. uv run examples/mega/bot.py
+   PYTHONPATH=. uv run dialog-yml-examples/mega/bot.py
    
    # Or if using python directly
-   PYTHONPATH=. python examples/mega/bot.py
+   PYTHONPATH=. python dialog-yml-examples/mega/bot.py
    ```
 
 > **Note**: The `PYTHONPATH=.` is required to ensure Python can correctly resolve the module imports when running the example.
@@ -495,7 +495,7 @@ This project uses a Makefile for common tasks:
 🧪 `make test` - Run tests
 📊 `make test-cov` - Generate test coverage report
 📈 `make test-html` - Generate HTML test coverage report
-🤖 `make mega-bot` - Run mega bot example
+🤖 `make mega-bot` - Run mega bot example (requires cloning the examples repo)
 
 ## 🧪 Testing
 

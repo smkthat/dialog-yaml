@@ -1,7 +1,7 @@
 import pytest
 from aiogram_dialog.widgets.media import StaticMedia, DynamicMedia
 
-from src.models.widgets.medias import StaticMediaModel, DynamicMediaModel
+from dialog_yml.models.widgets.medias import StaticMediaModel, DynamicMediaModel
 from tests.models.widgets.conftest import TestWidgetBase
 
 

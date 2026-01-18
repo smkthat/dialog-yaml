@@ -1,4 +1,4 @@
-.PHONY: help format check lint check-all test test-cov test-html mega-bot build dist upload-pypi upload-testpypi clean
+.PHONY: help format check lint check-all test test-unit test-integration test-functional test-cov test-html mega-bot build dist upload-pypi upload-testpypi clean
 
 # Detect OS
 UNAME_S := $(shell uname -s)
@@ -11,7 +11,7 @@ NC = \033[0m # No Color
 
 CWD := $(shell pwd)
 MAIN_MODULE = src
-CHECK_SRC = src
+CHECK_SRC = src tests
 
 help: # 💡 Show this help message
 	@echo "$(GREEN)spoetka-base$(NC)"
@@ -39,28 +39,34 @@ check-all: format check lint ## 🧠 Run format & all code quality checks
 	@echo "✅ Code quality checks passed!"
 	@echo
 
-test: ## 🧪 Run tests
-	@echo "🧪 Running tests..."
-	uv run pytest -v --no-header
+test: ## 🧪 Run all tests
+	@echo "🧪 Running all tests..."
+	uv run pytest -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-unit: ## 🧪 Run unit tests
+	@echo "🧪 Running unit tests..."
+	uv run pytest tests/unit -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-integration: ## 🧪 Run integration tests
+	@echo "🧪 Running integration tests..."
+	uv run pytest tests/integration -v --no-header -x $(PYTEST_ADDOPTS)
+
+test-functional: ## 🧪 Run functional tests
+	@echo "🧪 Running functional tests..."
+	uv run pytest tests/functional -v --no-header -x $(PYTEST_ADDOPTS)
 
 test-cov: ## 📊 Generating test coverage report
 	@echo "📊 Generating test coverage report..."
-	uv run pytest -v --no-header --cov
+	uv run pytest -v --no-header --cov=src $(PYTEST_ADDOPTS)
 
 test-html: ## 📊 Generating HTML test coverage report
 	@echo "📊 Generating HTML test coverage report..."
-	uv run pytest -v --no-header --cov --cov-report=html
+	uv run pytest -v --no-header --cov=src --cov-report=html $(PYTEST_ADDOPTS)
 	@echo
 	@echo "📄 See coverage report in htmlcov/index.html"
 
-mega-bot: ## 🤖 Run mega bot example
-	@echo "🤖 Running mega bot example..."
-	@echo "💡 Make sure to set MEGA_BOT_TOKEN in .env file"
-	PYTHONPATH=. uv run examples/mega/bot.py
-
-build: ## 📦 Build package distributions
+build: clean ## 📦 Build package distributions
 	@echo "📦 Building package distributions..."
-	rm -rf dist/ build/ *.egg-info
 	uv run python -m build
 	@echo "✅ Package distributions built successfully!"
 	@echo "📦 Files created:"
@@ -78,7 +84,9 @@ upload-testpypi: ## 🧪 Upload package to TestPyPI
 	@echo "🧪 Uploading package to TestPyPI..."
 	uv run python -m twine upload --repository testpypi dist/*
 
-clean: ## 🧹 Clean build artifacts
-	@echo "🧹 Cleaning build artifacts..."
-	rm -rf dist/ build/ *.egg-info .coverage htmlcov/ .pytest_cache/ .ruff_cache/
-	@echo "✅ Build artifacts cleaned up!"
+clean: ## 🧹 Clean build artifacts & cache
+	@echo "🧹 Cleaning build artifacts & cache..."
+	@find . -type d -name "*.egg-info" -exec rm -rf {} +
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
+	@rm -rf dist/ build/ .coverage htmlcov/ .pytest_cache/ .ruff_cache/
+	@echo "✅ Build artifacts & cache cleaned up!"

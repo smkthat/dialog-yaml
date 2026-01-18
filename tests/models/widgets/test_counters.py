@@ -2,7 +2,7 @@ import pytest
 from aiogram_dialog.widgets.kbd import Counter
 from aiogram_dialog.widgets.text import Progress
 
-from src.models.widgets.counters import ProgressModel, CounterModel
+from dialog_yml.models.widgets.counters import ProgressModel, CounterModel
 from tests.models.widgets.conftest import TestWidgetBase
 
 

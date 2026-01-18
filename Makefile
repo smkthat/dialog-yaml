@@ -53,14 +53,18 @@ test-html: ## 📊 Generating HTML test coverage report
 	@echo
 	@echo "📄 See coverage report in htmlcov/index.html"
 
-mega-bot: ## 🤖 Run mega bot example
+mega-bot: ## 🤖 Run mega bot example (requires cloning examples repo)
 	@echo "🤖 Running mega bot example..."
-	@echo "💡 Make sure to set MEGA_BOT_TOKEN in .env file"
-	PYTHONPATH=. uv run examples/mega/bot.py
+	@if [ ! -d "dialog-yml-examples" ]; then \
+		echo "⚠️  Warning: dialog-yml-examples directory not found"; \
+		echo "Please clone the examples repository first:"; \
+		echo "git clone https://github.com/smkthat/dialog-yml-examples.git"; \
+		exit 1; \
+	fi
+	cd dialog-yml-examples/mega && PYTHONPATH=. uv run bot.py
 
-build: ## 📦 Build package distributions
+build: clean ## 📦 Build package distributions
 	@echo "📦 Building package distributions..."
-	rm -rf dist/ build/ *.egg-info
 	uv run python -m build
 	@echo "✅ Package distributions built successfully!"
 	@echo "📦 Files created:"
@@ -78,7 +82,9 @@ upload-testpypi: ## 🧪 Upload package to TestPyPI
 	@echo "🧪 Uploading package to TestPyPI..."
 	uv run python -m twine upload --repository testpypi dist/*
 
-clean: ## 🧹 Clean build artifacts
-	@echo "🧹 Cleaning build artifacts..."
-	rm -rf dist/ build/ *.egg-info .coverage htmlcov/ .pytest_cache/ .ruff_cache/
-	@echo "✅ Build artifacts cleaned up!"
+clean: ## 🧹 Clean build artifacts & cache
+	@echo "🧹 Cleaning build artifacts & cache..."
+	@find . -type d -name "*.egg-info" -exec rm -rf {} +
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
+	@rm -rf dist/ build/ .coverage htmlcov/ .pytest_cache/ .ruff_cache/
+	@echo "✅ Build artifacts & cache cleaned up!"

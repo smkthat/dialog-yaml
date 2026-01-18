@@ -1,7 +1,7 @@
 import pytest
 from aiogram_dialog.widgets.kbd import Checkbox, Select, Radio, Multiselect
 
-from src.models.widgets.selects import (
+from dialog_yml.models.widgets.selects import (
     CheckboxModel,
     SelectModel,
     RadioModel,

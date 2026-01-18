@@ -2,12 +2,13 @@ from typing import Union, Callable, Awaitable
 
 import pytest
 
-from src.exceptions import (
+from dialog_yml import FuncsRegistry
+from dialog_yml.exceptions import (
     FunctionNotFoundError,
     DialogYamlException,
     CategoryNotFoundError,
 )
-from src.models.funcs.func import CategoryName, FuncModel, FuncsRegistry
+from dialog_yml.models.funcs.func import CategoryName, FuncModel
 
 
 @pytest.fixture

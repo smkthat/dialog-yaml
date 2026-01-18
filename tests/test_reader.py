@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from src.reader import YAMLReader
+from dialog_yml.reader import YAMLReader
 
 
 class TestYAMLReader:
@@ -45,7 +45,9 @@ class TestYAMLReader:
         data_dir_path = "/path/to/directory"
         expected_data = {"key1": {"key2": "value"}}
         mocker.patch("os.path.exists", return_value=True)
-        mocker.patch("builtins.open", mocker.mock_open(read_data="key1:\n  key2: value"))
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data="key1:\n  key2: value")
+        )
         # When
         result = YAMLReader.read_data_to_dict(data_file_path, data_dir_path)
         # Then
@@ -95,7 +97,9 @@ class TestYAMLReader:
         data_file_path = "corrupted.yaml"
         data_dir_path = "/path/to/directory"
         mocker.patch("os.path.exists", return_value=True)
-        mocker.patch("builtins.open", mocker.mock_open(read_data="key: value\ninvalid"))
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data="key: value\ninvalid")
+        )
         # When/Then
         with pytest.raises(yaml.YAMLError):
             YAMLReader.read_data_to_dict(data_file_path, data_dir_path)
@@ -109,7 +113,9 @@ class TestYAMLReader:
         mocker.patch("os.path.exists", return_value=True)
         mocker.patch(
             "builtins.open",
-            mocker.mock_open(read_data="\n".join(f'"{i}": {i}' for i in range(size))),
+            mocker.mock_open(
+                read_data="\n".join(f'"{i}": {i}' for i in range(size))
+            ),
         )
         # When
         result = YAMLReader.read_data_to_dict(data_file_path, data_dir_path)
@@ -122,7 +128,9 @@ class TestYAMLReader:
         data_dir_path = "/path/to/directory"
         expected_data = {"key": "!@#$%^&*()"}
         mocker.patch("os.path.exists", return_value=True)
-        mocker.patch("builtins.open", mocker.mock_open(read_data='key: "!@#$%^&*()"'))
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data='key: "!@#$%^&*()"')
+        )
         # When
         result = YAMLReader.read_data_to_dict(data_file_path, data_dir_path)
         # Then

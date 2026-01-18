@@ -2,12 +2,13 @@ from typing import Union, Callable, Awaitable
 
 import pytest
 
-from src.exceptions import (
+from dialog_yml import FuncsRegistry
+from dialog_yml.exceptions import (
     FunctionRegistrationError,
     InvalidFunctionType,
     CategoryNotFoundError,
 )
-from src.models.funcs.func import Category, FuncsRegistry, CategoryName
+from dialog_yml.models.funcs.func import Category, CategoryName
 
 
 @pytest.fixture
@@ -117,7 +118,9 @@ class TestFuncRegistry:
         with pytest.raises(CategoryNotFoundError):
             registry.get_category("nonexistent_category")
 
-    def test_register_function_in_notify_category(self, registry, get_test_func):
+    def test_register_function_in_notify_category(
+        self, registry, get_test_func
+    ):
         # Given
         function = get_test_func
 
@@ -126,7 +129,8 @@ class TestFuncRegistry:
 
         # Then
         assert (
-            registry.get_function(function.__name__, CategoryName.notify.value) == function
+            registry.get_function(function.__name__, CategoryName.notify.value)
+            == function
         )
 
     def test_retrieve_function_from_notify_category(self, registry):

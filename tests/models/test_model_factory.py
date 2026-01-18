@@ -4,12 +4,12 @@ import pytest
 from aiogram_dialog.api.internal import Widget
 from pydantic import ValidationError
 
-from src.exceptions import (
+from dialog_yml.exceptions import (
     ModelRegistrationError,
     InvalidTagName,
     DialogYamlException,
 )
-from src.models import YAMLModelFactory, YAMLModel
+from dialog_yml.models import YAMLModelFactory, YAMLModel
 
 
 class YAMLSubModel(YAMLModel):
@@ -189,7 +189,7 @@ class TestSetModelClasses(TestYAMLModelClass):
         with pytest.raises(InvalidTagName):
             YAMLModelFactory.set_classes(models_classes)
 
-    def test_raise_dialog_yaml_exception_when_models_classes_not_dictionary(
+    def test_raise_dialog_yml_exception_when_models_classes_not_dictionary(
         self,
     ):
         # Given
@@ -199,7 +199,7 @@ class TestSetModelClasses(TestYAMLModelClass):
         with pytest.raises(DialogYamlException):
             YAMLModelFactory.set_classes(models_classes)
 
-    def test_raise_dialog_yaml_exception_when_models_classes_not_dictionary_of_strings_to_yamlmodel_classes(
+    def test_raise_dialog_yml_exception_when_models_classes_not_dictionary_of_strings_to_yamlmodel_classes(
         self,
     ):
         # Given
@@ -209,7 +209,7 @@ class TestSetModelClasses(TestYAMLModelClass):
         with pytest.raises(DialogYamlException):
             YAMLModelFactory.set_classes(models_classes)
 
-    def test_raise_dialog_yaml_exception_when_models_classes_is_none(self):
+    def test_raise_dialog_yml_exception_when_models_classes_is_none(self):
         # Given
         models_classes = None
 

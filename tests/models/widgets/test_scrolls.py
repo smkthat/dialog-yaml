@@ -2,7 +2,7 @@ import pytest
 from aiogram_dialog.widgets.kbd import StubScroll, NumberedPager, SwitchPage
 from aiogram_dialog.widgets.text import ScrollingText
 
-from src.models.widgets.scrolls.scroll import (
+from dialog_yml.models.widgets.scrolls.scroll import (
     ScrollingTextModel,
     StubScrollModel,
     NumberedPagerModel,
@@ -63,7 +63,9 @@ class TestScroll(TestWidgetBase):
             ({"last_page": "scroll_no_pager"}, LastPageModel, SwitchPage),
         ],
     )
-    def test_scroll(self, input_data: dict, expected_model_cls, expected_widget_cls):
+    def test_scroll(
+        self, input_data: dict, expected_model_cls, expected_widget_cls
+    ):
         widget_model = self.yaml_model.create_model(input_data)
         assert isinstance(widget_model, expected_model_cls)
 

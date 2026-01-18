@@ -11,7 +11,7 @@ from aiogram_dialog.widgets.kbd import (
     ScrollingGroup,
 )
 
-from src.models.widgets.kbd.keyboard import (
+from dialog_yml.models.widgets.kbd.keyboard import (
     UrlButtonModel,
     CallbackButtonModel,
     SwitchToModel,

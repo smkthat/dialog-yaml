@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-18
+
+### Changed
+
+- Project renamed from dialog-yaml to dialog-yml
+- Source code moved from src/ to src/dialog_yml/
+- All imports changed from dialog_yaml to dialog_yml
+- Examples moved to external repository (dialog-yml-examples)
+- Test data extensions changed from .yaml to .yml
+- Updated documentation to reflect new naming
+- Updated Makefile to work with new examples location
+- Package name changed in pyproject.toml and setup.cfg
+- Middleware parameter renamed from dialog_yaml to dialog_yml
+- Various internal imports updated to reflect new package structure
+- Removed .env.dev file
+
 ## [0.1.1] - 2026-01-18
 
 ### Added

@@ -1,7 +1,7 @@
 import pytest
 from aiogram_dialog.widgets.text import Const, Format, Multi, Case, List
 
-from src.models.widgets.texts.text import (
+from dialog_yml.models.widgets.texts.text import (
     TextModel,
     FormatModel,
     MultiTextModel,

@@ -1,8 +1,8 @@
 import pytest
 from aiogram.fsm.state import StatesGroup, State
 
-from src.exceptions import DialogYamlException, StatesGroupNotFoundError
-from src.states import YAMLStatesManager
+from dialog_yml.exceptions import DialogYamlException, StatesGroupNotFoundError
+from dialog_yml.states import YAMLStatesManager
 
 
 @pytest.fixture
@@ -82,7 +82,9 @@ class TestYAMLStatesManager:
         # Then
         assert isinstance(states_manager.get_by_name("group1:new_state"), State)
 
-    def test_add_state_to_map_without_group_name(self, get_none_empty_states_manager):
+    def test_add_state_to_map_without_group_name(
+        self, get_none_empty_states_manager
+    ):
         # Given
         states_manager = get_none_empty_states_manager
         none_existed_group_name = None
@@ -92,7 +94,9 @@ class TestYAMLStatesManager:
         with pytest.raises(StatesGroupNotFoundError):
             states_manager.add_state_to_map(none_existed_group_name, state)
 
-    def test_add_state_to_map_with_none_existed_group(self, get_none_empty_states_manager):
+    def test_add_state_to_map_with_none_existed_group(
+        self, get_none_empty_states_manager
+    ):
         # Given
         states_manager = get_none_empty_states_manager
         none_existed_group_name = "none_existed_group"
@@ -115,8 +119,12 @@ class TestYAMLStatesManager:
         states_manager.add_states_to_map(group_name, states)
 
         # Then
-        assert isinstance(states_manager.get_by_name("group1:new_state1"), State)
-        assert isinstance(states_manager.get_by_name("group1:new_state2"), State)
+        assert isinstance(
+            states_manager.get_by_name("group1:new_state1"), State
+        )
+        assert isinstance(
+            states_manager.get_by_name("group1:new_state2"), State
+        )
 
     def test_valid_raw_states_with_group_name(self, get_empty_states_manager):
         # Given
@@ -129,7 +137,9 @@ class TestYAMLStatesManager:
         states_manager = get_empty_states_manager
 
         # When
-        parsed_states = states_manager.parse_raw_states_from_list(raw_states_list)
+        parsed_states = states_manager.parse_raw_states_from_list(
+            raw_states_list
+        )
 
         # Then
         assert len(parsed_states) == 6
@@ -140,7 +150,9 @@ class TestYAMLStatesManager:
         assert isinstance(parsed_states["group2"].state3, State)
         assert isinstance(parsed_states["group2"].state4, State)
 
-    def test_valid_raw_states_without_group_name(self, get_empty_states_manager):
+    def test_valid_raw_states_without_group_name(
+        self, get_empty_states_manager
+    ):
         # Given
         raw_states_list = {"state1", "state2", "state3"}
         states_manager = get_empty_states_manager
@@ -155,7 +167,9 @@ class TestYAMLStatesManager:
         states_manager = get_empty_states_manager
 
         # When
-        parsed_states = states_manager.parse_raw_states_from_list(raw_states_list)
+        parsed_states = states_manager.parse_raw_states_from_list(
+            raw_states_list
+        )
 
         # Then
         assert len(parsed_states) == 0
@@ -194,7 +208,9 @@ class TestYAMLStatesManager:
         states_manager = get_empty_states_manager
 
         # When
-        actual_raw_state_name = states_manager.format_state_name(group_name, state_name)
+        actual_raw_state_name = states_manager.format_state_name(
+            group_name, state_name
+        )
 
         # Then
         assert actual_raw_state_name == f"{group_name}:{state_name}"
@@ -263,7 +279,9 @@ class TestBuildStatesFromYAMLData:
         with pytest.raises(DialogYamlException):
             states_manager.build_states_from_yaml_data(data)
 
-    def test_build_states_from_invalid_dialogs_data_type(self, get_empty_states_manager):
+    def test_build_states_from_invalid_dialogs_data_type(
+        self, get_empty_states_manager
+    ):
         # Given
         states_manager = get_empty_states_manager
         data = {
@@ -276,7 +294,9 @@ class TestBuildStatesFromYAMLData:
         with pytest.raises(DialogYamlException):
             states_manager.build_states_from_yaml_data(data)
 
-    def test_build_states_from_invalid_windows_data_type(self, get_empty_states_manager):
+    def test_build_states_from_invalid_windows_data_type(
+        self, get_empty_states_manager
+    ):
         # Given
         states_manager = get_empty_states_manager
         data = {
@@ -291,7 +311,9 @@ class TestBuildStatesFromYAMLData:
 
 
 class TestExtractGroupAndStateNames:
-    def test_valid_raw_states_group_with_one_delimiter(self, get_empty_states_manager):
+    def test_valid_raw_states_group_with_one_delimiter(
+        self, get_empty_states_manager
+    ):
         # Given
         raw_states_group = "group1:state1"
         expected_group_name = "group1"
@@ -307,7 +329,9 @@ class TestExtractGroupAndStateNames:
         assert group_name == expected_group_name
         assert state_name == expected_state_name
 
-    def test_valid_raw_states_group_with_two_delimiters(self, get_empty_states_manager):
+    def test_valid_raw_states_group_with_two_delimiters(
+        self, get_empty_states_manager
+    ):
         # Given
         raw_states_group = "group1:state1:state2"
         states_manager = get_empty_states_manager
@@ -365,11 +389,15 @@ class TestIncludeStatesGroupsByClass:
         assert len(manager._states_groups_map_) == 3
         assert manager.get_by_name("MyStatesGroup") is not None
         assert (
-            manager.get_by_name(manager.format_state_name("MyStatesGroup", "STATE_1"))
+            manager.get_by_name(
+                manager.format_state_name("MyStatesGroup", "STATE_1")
+            )
             is not None
         )
         assert (
-            manager.get_by_name(manager.format_state_name("MyStatesGroup", "STATE_2"))
+            manager.get_by_name(
+                manager.format_state_name("MyStatesGroup", "STATE_2")
+            )
             is not None
         )
 

@@ -64,6 +64,15 @@ include = ["dialog_yml*"]
 target-version = "py313"
 line-length = 91
 
+[tool.ty.src]
+include = ["src"]
+
+[tool.ty.rules]
+no-matching-overload = "ignore"
+invalid-assignment = "ignore"
+invalid-argument-type = "ignore"
+possibly-missing-attribute = "ignore"
+
 [tool.coverage.run]
 omit = [
     "*/examples/*",
